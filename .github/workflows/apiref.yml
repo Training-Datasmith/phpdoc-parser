@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ matrix.branch }}
 
@@ -52,7 +52,7 @@ jobs:
       - name: "Copy favicon"
         run: "cp apigen/favicon.png docs/favicon.png"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: docs-${{ matrix.branch }}
           path: docs/*
@@ -64,14 +64,14 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: docs-*
           path: docs
           merge-multiple: true
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: 'docs'
 
