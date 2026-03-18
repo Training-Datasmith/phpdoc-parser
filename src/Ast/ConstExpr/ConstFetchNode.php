@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Ast\ConstExpr;
 
@@ -6,42 +8,41 @@ use PHPStan\PhpDocParser\Ast\NodeAttributes;
 
 class ConstFetchNode implements ConstExprNode
 {
+    use NodeAttributes;
 
-	use NodeAttributes;
+    /** @var string class name for class constants or empty string for non-class constants */
+    public string $className;
 
-	/** @var string class name for class constants or empty string for non-class constants */
-	public string $className;
+    public string $name;
 
-	public string $name;
+    public function __construct(string $className, string $name)
+    {
+        $this->className = $className;
+        $this->name = $name;
+    }
 
-	public function __construct(string $className, string $name)
-	{
-		$this->className = $className;
-		$this->name = $name;
-	}
+    public function __toString(): string
+    {
+        if ($this->className === '') {
+            return $this->name;
 
-	public function __toString(): string
-	{
-		if ($this->className === '') {
-			return $this->name;
+        }
 
-		}
+        return "{$this->className}::{$this->name}";
+    }
 
-		return "{$this->className}::{$this->name}";
-	}
-
-	/**
-	 * @param array<string, mixed> $properties
-	 */
-	public static function __set_state(array $properties): self
-	{
-		$instance = new self($properties['className'], $properties['name']);
-		if (isset($properties['attributes'])) {
-			foreach ($properties['attributes'] as $key => $value) {
-				$instance->setAttribute($key, $value);
-			}
-		}
-		return $instance;
-	}
+    /**
+     * @param array<string, mixed> $properties
+     */
+    public static function __set_state(array $properties): self
+    {
+        $instance = new self($properties['className'], $properties['name']);
+        if (isset($properties['attributes'])) {
+            foreach ($properties['attributes'] as $key => $value) {
+                $instance->setAttribute($key, $value);
+            }
+        }
+        return $instance;
+    }
 
 }

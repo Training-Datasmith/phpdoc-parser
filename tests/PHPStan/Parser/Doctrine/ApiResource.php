@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Parser\Doctrine;
 
@@ -12,17 +14,16 @@ namespace PHPStan\PhpDocParser\Parser\Doctrine;
  */
 final class ApiResource
 {
+    public string $shortName;
 
-	public string $shortName;
+    public string $description;
 
-	public string $description;
+    public string $iri;
 
-	public string $iri;
+    public array $itemOperations;
 
-	public array $itemOperations;
+    public array $collectionOperations;
 
-	public array $collectionOperations;
-
-	public array $attributes = [];
+    public array $attributes = [];
 
 }

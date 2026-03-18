@@ -1,58 +1,60 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Ast\PhpDoc;
 
 use PHPStan\PhpDocParser\Ast\NodeAttributes;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
+
 use function trim;
 
 class AssertTagMethodValueNode implements PhpDocTagValueNode
 {
+    use NodeAttributes;
 
-	use NodeAttributes;
+    public TypeNode $type;
 
-	public TypeNode $type;
+    public string $parameter;
 
-	public string $parameter;
+    public string $method;
 
-	public string $method;
+    public bool $isNegated;
 
-	public bool $isNegated;
+    public bool $isEquality;
 
-	public bool $isEquality;
+    /** @var string (may be empty) */
+    public string $description;
 
-	/** @var string (may be empty) */
-	public string $description;
+    public function __construct(TypeNode $type, string $parameter, string $method, bool $isNegated, string $description, bool $isEquality)
+    {
+        $this->type = $type;
+        $this->parameter = $parameter;
+        $this->method = $method;
+        $this->isNegated = $isNegated;
+        $this->isEquality = $isEquality;
+        $this->description = $description;
+    }
 
-	public function __construct(TypeNode $type, string $parameter, string $method, bool $isNegated, string $description, bool $isEquality)
-	{
-		$this->type = $type;
-		$this->parameter = $parameter;
-		$this->method = $method;
-		$this->isNegated = $isNegated;
-		$this->isEquality = $isEquality;
-		$this->description = $description;
-	}
+    public function __toString(): string
+    {
+        $isNegated = $this->isNegated ? '!' : '';
+        $isEquality = $this->isEquality ? '=' : '';
+        return trim("{$isNegated}{$isEquality}{$this->type} {$this->parameter}->{$this->method}() {$this->description}");
+    }
 
-	public function __toString(): string
-	{
-		$isNegated = $this->isNegated ? '!' : '';
-		$isEquality = $this->isEquality ? '=' : '';
-		return trim("{$isNegated}{$isEquality}{$this->type} {$this->parameter}->{$this->method}() {$this->description}");
-	}
-
-	/**
-	 * @param array<string, mixed> $properties
-	 */
-	public static function __set_state(array $properties): self
-	{
-		$instance = new self($properties['type'], $properties['parameter'], $properties['method'], $properties['isNegated'], $properties['description'], $properties['isEquality']);
-		if (isset($properties['attributes'])) {
-			foreach ($properties['attributes'] as $key => $value) {
-				$instance->setAttribute($key, $value);
-			}
-		}
-		return $instance;
-	}
+    /**
+     * @param array<string, mixed> $properties
+     */
+    public static function __set_state(array $properties): self
+    {
+        $instance = new self($properties['type'], $properties['parameter'], $properties['method'], $properties['isNegated'], $properties['description'], $properties['isEquality']);
+        if (isset($properties['attributes'])) {
+            foreach ($properties['attributes'] as $key => $value) {
+                $instance->setAttribute($key, $value);
+            }
+        }
+        return $instance;
+    }
 
 }

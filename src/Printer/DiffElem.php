@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Printer;
 
@@ -14,31 +16,30 @@ namespace PHPStan\PhpDocParser\Printer;
  */
 class DiffElem
 {
+    public const TYPE_KEEP = 0;
+    public const TYPE_REMOVE = 1;
+    public const TYPE_ADD = 2;
+    public const TYPE_REPLACE = 3;
 
-	public const TYPE_KEEP = 0;
-	public const TYPE_REMOVE = 1;
-	public const TYPE_ADD = 2;
-	public const TYPE_REPLACE = 3;
+    /** @var self::TYPE_* */
+    public $type;
 
-	/** @var self::TYPE_* */
-	public $type;
+    /** @var mixed Is null for add operations */
+    public $old;
 
-	/** @var mixed Is null for add operations */
-	public $old;
+    /** @var mixed Is null for remove operations */
+    public $new;
 
-	/** @var mixed Is null for remove operations */
-	public $new;
-
-	/**
-	 * @param self::TYPE_* $type
-	 * @param mixed $old Is null for add operations
-	 * @param mixed $new Is null for remove operations
-	 */
-	public function __construct(int $type, $old, $new)
-	{
-		$this->type = $type;
-		$this->old = $old;
-		$this->new = $new;
-	}
+    /**
+     * @param self::TYPE_* $type
+     * @param mixed $old Is null for add operations
+     * @param mixed $new Is null for remove operations
+     */
+    public function __construct(int $type, $old, $new)
+    {
+        $this->type = $type;
+        $this->old = $old;
+        $this->new = $new;
+    }
 
 }

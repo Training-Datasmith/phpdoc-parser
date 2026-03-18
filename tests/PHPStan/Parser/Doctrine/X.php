@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Parser\Doctrine;
 
@@ -7,11 +9,10 @@ namespace PHPStan\PhpDocParser\Parser\Doctrine;
  */
 class X
 {
+    /** @var mixed */
+    public $a;
 
-	/** @var mixed */
-	public $a;
-
-	/** @var mixed */
-	public $b;
+    /** @var mixed */
+    public $b;
 
 }

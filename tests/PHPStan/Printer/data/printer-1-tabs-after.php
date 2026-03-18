@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MyNamespace;
 
 /**
@@ -13,14 +15,13 @@ function foo($a, $b)
 
 class Foo
 {
+    /**
+     * @param Foo $a
+     * @param Bar $b
+     */
+    public function doFoo($a, $b)
+    {
 
-	/**
-	 * @param Foo $a
-	 * @param Bar $b
-	 */
-	public function doFoo($a, $b)
-	{
-
-	}
+    }
 
 }

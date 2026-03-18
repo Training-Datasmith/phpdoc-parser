@@ -1,400 +1,403 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Parser;
 
-use LogicException;
-use PHPStan\PhpDocParser\Ast\Comment;
-use PHPStan\PhpDocParser\Lexer\Lexer;
 use function array_pop;
 use function assert;
 use function count;
 use function in_array;
+
+use LogicException;
+use PHPStan\PhpDocParser\Ast\Comment;
+use PHPStan\PhpDocParser\Lexer\Lexer;
+
 use function strlen;
 use function substr;
 
 class TokenIterator
 {
+    /** @var list<array{string, int, int}> */
+    private array $tokens;
 
-	/** @var list<array{string, int, int}> */
-	private array $tokens;
+    private int $index;
 
-	private int $index;
+    /** @var list<Comment> */
+    private array $comments = [];
 
-	/** @var list<Comment> */
-	private array $comments = [];
+    /** @var list<array{int, list<Comment>}> */
+    private array $savePoints = [];
 
-	/** @var list<array{int, list<Comment>}> */
-	private array $savePoints = [];
+    /** @var list<int> */
+    private array $skippedTokenTypes = [Lexer::TOKEN_HORIZONTAL_WS];
 
-	/** @var list<int> */
-	private array $skippedTokenTypes = [Lexer::TOKEN_HORIZONTAL_WS];
+    private ?string $newline = null;
 
-	private ?string $newline = null;
+    /**
+     * @param list<array{string, int, int}> $tokens
+     */
+    public function __construct(array $tokens, int $index = 0)
+    {
+        $this->tokens = $tokens;
+        $this->index = $index;
 
-	/**
-	 * @param list<array{string, int, int}> $tokens
-	 */
-	public function __construct(array $tokens, int $index = 0)
-	{
-		$this->tokens = $tokens;
-		$this->index = $index;
+        $this->skipIrrelevantTokens();
+    }
 
-		$this->skipIrrelevantTokens();
-	}
+    /**
+     * @return list<array{string, int, int}>
+     */
+    public function getTokens(): array
+    {
+        return $this->tokens;
+    }
 
-	/**
-	 * @return list<array{string, int, int}>
-	 */
-	public function getTokens(): array
-	{
-		return $this->tokens;
-	}
+    public function getContentBetween(int $startPos, int $endPos): string
+    {
+        if ($startPos < 0 || $endPos > count($this->tokens)) {
+            throw new LogicException();
+        }
 
-	public function getContentBetween(int $startPos, int $endPos): string
-	{
-		if ($startPos < 0 || $endPos > count($this->tokens)) {
-			throw new LogicException();
-		}
+        $content = '';
+        for ($i = $startPos; $i < $endPos; $i++) {
+            $content .= $this->tokens[$i][Lexer::VALUE_OFFSET];
+        }
 
-		$content = '';
-		for ($i = $startPos; $i < $endPos; $i++) {
-			$content .= $this->tokens[$i][Lexer::VALUE_OFFSET];
-		}
+        return $content;
+    }
 
-		return $content;
-	}
+    public function getTokenCount(): int
+    {
+        return count($this->tokens);
+    }
 
-	public function getTokenCount(): int
-	{
-		return count($this->tokens);
-	}
+    public function currentTokenValue(): string
+    {
+        return $this->tokens[$this->index][Lexer::VALUE_OFFSET];
+    }
 
-	public function currentTokenValue(): string
-	{
-		return $this->tokens[$this->index][Lexer::VALUE_OFFSET];
-	}
+    public function currentTokenType(): int
+    {
+        return $this->tokens[$this->index][Lexer::TYPE_OFFSET];
+    }
 
-	public function currentTokenType(): int
-	{
-		return $this->tokens[$this->index][Lexer::TYPE_OFFSET];
-	}
+    public function currentTokenOffset(): int
+    {
+        $offset = 0;
+        for ($i = 0; $i < $this->index; $i++) {
+            $offset += strlen($this->tokens[$i][Lexer::VALUE_OFFSET]);
+        }
 
-	public function currentTokenOffset(): int
-	{
-		$offset = 0;
-		for ($i = 0; $i < $this->index; $i++) {
-			$offset += strlen($this->tokens[$i][Lexer::VALUE_OFFSET]);
-		}
+        return $offset;
+    }
 
-		return $offset;
-	}
+    public function currentTokenLine(): int
+    {
+        return $this->tokens[$this->index][Lexer::LINE_OFFSET];
+    }
 
-	public function currentTokenLine(): int
-	{
-		return $this->tokens[$this->index][Lexer::LINE_OFFSET];
-	}
+    public function currentTokenIndex(): int
+    {
+        return $this->index;
+    }
 
-	public function currentTokenIndex(): int
-	{
-		return $this->index;
-	}
+    public function endIndexOfLastRelevantToken(): int
+    {
+        $endIndex = $this->currentTokenIndex();
+        $endIndex--;
+        while (in_array($this->tokens[$endIndex][Lexer::TYPE_OFFSET], $this->skippedTokenTypes, true)) {
+            if (!isset($this->tokens[$endIndex - 1])) {
+                break;
+            }
+            $endIndex--;
+        }
 
-	public function endIndexOfLastRelevantToken(): int
-	{
-		$endIndex = $this->currentTokenIndex();
-		$endIndex--;
-		while (in_array($this->tokens[$endIndex][Lexer::TYPE_OFFSET], $this->skippedTokenTypes, true)) {
-			if (!isset($this->tokens[$endIndex - 1])) {
-				break;
-			}
-			$endIndex--;
-		}
+        return $endIndex;
+    }
 
-		return $endIndex;
-	}
+    public function isCurrentTokenValue(string $tokenValue): bool
+    {
+        return $this->tokens[$this->index][Lexer::VALUE_OFFSET] === $tokenValue;
+    }
 
-	public function isCurrentTokenValue(string $tokenValue): bool
-	{
-		return $this->tokens[$this->index][Lexer::VALUE_OFFSET] === $tokenValue;
-	}
+    public function isCurrentTokenType(int ...$tokenType): bool
+    {
+        return in_array($this->tokens[$this->index][Lexer::TYPE_OFFSET], $tokenType, true);
+    }
 
-	public function isCurrentTokenType(int ...$tokenType): bool
-	{
-		return in_array($this->tokens[$this->index][Lexer::TYPE_OFFSET], $tokenType, true);
-	}
+    public function isPrecededByHorizontalWhitespace(): bool
+    {
+        return ($this->tokens[$this->index - 1][Lexer::TYPE_OFFSET] ?? -1) === Lexer::TOKEN_HORIZONTAL_WS;
+    }
 
-	public function isPrecededByHorizontalWhitespace(): bool
-	{
-		return ($this->tokens[$this->index - 1][Lexer::TYPE_OFFSET] ?? -1) === Lexer::TOKEN_HORIZONTAL_WS;
-	}
+    /**
+     * @throws ParserException
+     */
+    public function consumeTokenType(int $tokenType): void
+    {
+        if ($this->tokens[$this->index][Lexer::TYPE_OFFSET] !== $tokenType) {
+            $this->throwError($tokenType);
+        }
 
-	/**
-	 * @throws ParserException
-	 */
-	public function consumeTokenType(int $tokenType): void
-	{
-		if ($this->tokens[$this->index][Lexer::TYPE_OFFSET] !== $tokenType) {
-			$this->throwError($tokenType);
-		}
+        if ($tokenType === Lexer::TOKEN_PHPDOC_EOL) {
+            if ($this->newline === null) {
+                $this->detectNewline();
+            }
+        }
 
-		if ($tokenType === Lexer::TOKEN_PHPDOC_EOL) {
-			if ($this->newline === null) {
-				$this->detectNewline();
-			}
-		}
+        $this->next();
+    }
 
-		$this->next();
-	}
+    /**
+     * @throws ParserException
+     */
+    public function consumeTokenValue(int $tokenType, string $tokenValue): void
+    {
+        if ($this->tokens[$this->index][Lexer::TYPE_OFFSET] !== $tokenType || $this->tokens[$this->index][Lexer::VALUE_OFFSET] !== $tokenValue) {
+            $this->throwError($tokenType, $tokenValue);
+        }
 
-	/**
-	 * @throws ParserException
-	 */
-	public function consumeTokenValue(int $tokenType, string $tokenValue): void
-	{
-		if ($this->tokens[$this->index][Lexer::TYPE_OFFSET] !== $tokenType || $this->tokens[$this->index][Lexer::VALUE_OFFSET] !== $tokenValue) {
-			$this->throwError($tokenType, $tokenValue);
-		}
+        $this->next();
+    }
 
-		$this->next();
-	}
+    /** @phpstan-impure */
+    public function tryConsumeTokenValue(string $tokenValue): bool
+    {
+        if ($this->tokens[$this->index][Lexer::VALUE_OFFSET] !== $tokenValue) {
+            return false;
+        }
 
-	/** @phpstan-impure */
-	public function tryConsumeTokenValue(string $tokenValue): bool
-	{
-		if ($this->tokens[$this->index][Lexer::VALUE_OFFSET] !== $tokenValue) {
-			return false;
-		}
+        $this->next();
 
-		$this->next();
+        return true;
+    }
 
-		return true;
-	}
+    /**
+     * @return list<Comment>
+     */
+    public function flushComments(): array
+    {
+        $res = $this->comments;
+        $this->comments = [];
+        return $res;
+    }
 
-	/**
-	 * @return list<Comment>
-	 */
-	public function flushComments(): array
-	{
-		$res = $this->comments;
-		$this->comments = [];
-		return $res;
-	}
+    /** @phpstan-impure */
+    public function tryConsumeTokenType(int $tokenType): bool
+    {
+        if ($this->tokens[$this->index][Lexer::TYPE_OFFSET] !== $tokenType) {
+            return false;
+        }
 
-	/** @phpstan-impure */
-	public function tryConsumeTokenType(int $tokenType): bool
-	{
-		if ($this->tokens[$this->index][Lexer::TYPE_OFFSET] !== $tokenType) {
-			return false;
-		}
+        if ($tokenType === Lexer::TOKEN_PHPDOC_EOL) {
+            if ($this->newline === null) {
+                $this->detectNewline();
+            }
+        }
 
-		if ($tokenType === Lexer::TOKEN_PHPDOC_EOL) {
-			if ($this->newline === null) {
-				$this->detectNewline();
-			}
-		}
+        $this->next();
 
-		$this->next();
+        return true;
+    }
 
-		return true;
-	}
+    /**
+     * @deprecated Use skipNewLineTokensAndConsumeComments instead (when parsing a type)
+     */
+    public function skipNewLineTokens(): void
+    {
+        if (!$this->isCurrentTokenType(Lexer::TOKEN_PHPDOC_EOL)) {
+            return;
+        }
 
-	/**
-	 * @deprecated Use skipNewLineTokensAndConsumeComments instead (when parsing a type)
-	 */
-	public function skipNewLineTokens(): void
-	{
-		if (!$this->isCurrentTokenType(Lexer::TOKEN_PHPDOC_EOL)) {
-			return;
-		}
+        do {
+            $foundNewLine = $this->tryConsumeTokenType(Lexer::TOKEN_PHPDOC_EOL);
+        } while ($foundNewLine === true);
+    }
 
-		do {
-			$foundNewLine = $this->tryConsumeTokenType(Lexer::TOKEN_PHPDOC_EOL);
-		} while ($foundNewLine === true);
-	}
+    public function skipNewLineTokensAndConsumeComments(): void
+    {
+        if ($this->currentTokenType() === Lexer::TOKEN_COMMENT) {
+            $this->comments[] = new Comment($this->currentTokenValue(), $this->currentTokenLine(), $this->currentTokenIndex());
+            $this->next();
+        }
 
-	public function skipNewLineTokensAndConsumeComments(): void
-	{
-		if ($this->currentTokenType() === Lexer::TOKEN_COMMENT) {
-			$this->comments[] = new Comment($this->currentTokenValue(), $this->currentTokenLine(), $this->currentTokenIndex());
-			$this->next();
-		}
+        if (!$this->isCurrentTokenType(Lexer::TOKEN_PHPDOC_EOL)) {
+            return;
+        }
 
-		if (!$this->isCurrentTokenType(Lexer::TOKEN_PHPDOC_EOL)) {
-			return;
-		}
+        do {
+            $foundNewLine = $this->tryConsumeTokenType(Lexer::TOKEN_PHPDOC_EOL);
+            if ($this->currentTokenType() !== Lexer::TOKEN_COMMENT) {
+                continue;
+            }
 
-		do {
-			$foundNewLine = $this->tryConsumeTokenType(Lexer::TOKEN_PHPDOC_EOL);
-			if ($this->currentTokenType() !== Lexer::TOKEN_COMMENT) {
-				continue;
-			}
+            $this->comments[] = new Comment($this->currentTokenValue(), $this->currentTokenLine(), $this->currentTokenIndex());
+            $this->next();
+        } while ($foundNewLine === true);
+    }
 
-			$this->comments[] = new Comment($this->currentTokenValue(), $this->currentTokenLine(), $this->currentTokenIndex());
-			$this->next();
-		} while ($foundNewLine === true);
-	}
+    private function detectNewline(): void
+    {
+        $value = $this->currentTokenValue();
+        if (substr($value, 0, 2) === "\r\n") {
+            $this->newline = "\r\n";
+        } elseif (substr($value, 0, 1) === "\n") {
+            $this->newline = "\n";
+        }
+    }
 
-	private function detectNewline(): void
-	{
-		$value = $this->currentTokenValue();
-		if (substr($value, 0, 2) === "\r\n") {
-			$this->newline = "\r\n";
-		} elseif (substr($value, 0, 1) === "\n") {
-			$this->newline = "\n";
-		}
-	}
+    public function getSkippedHorizontalWhiteSpaceIfAny(): string
+    {
+        if ($this->index > 0 && $this->tokens[$this->index - 1][Lexer::TYPE_OFFSET] === Lexer::TOKEN_HORIZONTAL_WS) {
+            return $this->tokens[$this->index - 1][Lexer::VALUE_OFFSET];
+        }
 
-	public function getSkippedHorizontalWhiteSpaceIfAny(): string
-	{
-		if ($this->index > 0 && $this->tokens[$this->index - 1][Lexer::TYPE_OFFSET] === Lexer::TOKEN_HORIZONTAL_WS) {
-			return $this->tokens[$this->index - 1][Lexer::VALUE_OFFSET];
-		}
+        return '';
+    }
 
-		return '';
-	}
+    /** @phpstan-impure */
+    public function joinUntil(int ...$tokenType): string
+    {
+        $s = '';
+        while (!in_array($this->tokens[$this->index][Lexer::TYPE_OFFSET], $tokenType, true)) {
+            $s .= $this->tokens[$this->index++][Lexer::VALUE_OFFSET];
+        }
+        return $s;
+    }
 
-	/** @phpstan-impure */
-	public function joinUntil(int ...$tokenType): string
-	{
-		$s = '';
-		while (!in_array($this->tokens[$this->index][Lexer::TYPE_OFFSET], $tokenType, true)) {
-			$s .= $this->tokens[$this->index++][Lexer::VALUE_OFFSET];
-		}
-		return $s;
-	}
+    public function next(): void
+    {
+        $this->index++;
+        $this->skipIrrelevantTokens();
+    }
 
-	public function next(): void
-	{
-		$this->index++;
-		$this->skipIrrelevantTokens();
-	}
+    private function skipIrrelevantTokens(): void
+    {
+        if (!isset($this->tokens[$this->index])) {
+            return;
+        }
 
-	private function skipIrrelevantTokens(): void
-	{
-		if (!isset($this->tokens[$this->index])) {
-			return;
-		}
+        while (in_array($this->tokens[$this->index][Lexer::TYPE_OFFSET], $this->skippedTokenTypes, true)) {
+            if (!isset($this->tokens[$this->index + 1])) {
+                break;
+            }
+            $this->index++;
+        }
+    }
 
-		while (in_array($this->tokens[$this->index][Lexer::TYPE_OFFSET], $this->skippedTokenTypes, true)) {
-			if (!isset($this->tokens[$this->index + 1])) {
-				break;
-			}
-			$this->index++;
-		}
-	}
+    public function addEndOfLineToSkippedTokens(): void
+    {
+        $this->skippedTokenTypes = [Lexer::TOKEN_HORIZONTAL_WS, Lexer::TOKEN_PHPDOC_EOL];
+    }
 
-	public function addEndOfLineToSkippedTokens(): void
-	{
-		$this->skippedTokenTypes = [Lexer::TOKEN_HORIZONTAL_WS, Lexer::TOKEN_PHPDOC_EOL];
-	}
+    public function removeEndOfLineFromSkippedTokens(): void
+    {
+        $this->skippedTokenTypes = [Lexer::TOKEN_HORIZONTAL_WS];
+    }
 
-	public function removeEndOfLineFromSkippedTokens(): void
-	{
-		$this->skippedTokenTypes = [Lexer::TOKEN_HORIZONTAL_WS];
-	}
+    /** @phpstan-impure */
+    public function forwardToTheEnd(): void
+    {
+        $lastToken = count($this->tokens) - 1;
+        $this->index = $lastToken;
+    }
 
-	/** @phpstan-impure */
-	public function forwardToTheEnd(): void
-	{
-		$lastToken = count($this->tokens) - 1;
-		$this->index = $lastToken;
-	}
+    public function pushSavePoint(): void
+    {
+        $this->savePoints[] = [$this->index, $this->comments];
+    }
 
-	public function pushSavePoint(): void
-	{
-		$this->savePoints[] = [$this->index, $this->comments];
-	}
+    public function dropSavePoint(): void
+    {
+        array_pop($this->savePoints);
+    }
 
-	public function dropSavePoint(): void
-	{
-		array_pop($this->savePoints);
-	}
+    public function rollback(): void
+    {
+        $savepoint = array_pop($this->savePoints);
+        assert($savepoint !== null);
+        [$this->index, $this->comments] = $savepoint;
+    }
 
-	public function rollback(): void
-	{
-		$savepoint = array_pop($this->savePoints);
-		assert($savepoint !== null);
-		[$this->index, $this->comments] = $savepoint;
-	}
+    /**
+     * @throws ParserException
+     */
+    private function throwError(int $expectedTokenType, ?string $expectedTokenValue = null): void
+    {
+        throw new ParserException(
+            $this->currentTokenValue(),
+            $this->currentTokenType(),
+            $this->currentTokenOffset(),
+            $expectedTokenType,
+            $expectedTokenValue,
+            $this->currentTokenLine(),
+        );
+    }
 
-	/**
-	 * @throws ParserException
-	 */
-	private function throwError(int $expectedTokenType, ?string $expectedTokenValue = null): void
-	{
-		throw new ParserException(
-			$this->currentTokenValue(),
-			$this->currentTokenType(),
-			$this->currentTokenOffset(),
-			$expectedTokenType,
-			$expectedTokenValue,
-			$this->currentTokenLine(),
-		);
-	}
+    /**
+     * Check whether the position is directly preceded by a certain token type.
+     *
+     * During this check TOKEN_HORIZONTAL_WS and TOKEN_PHPDOC_EOL are skipped
+     */
+    public function hasTokenImmediatelyBefore(int $pos, int $expectedTokenType): bool
+    {
+        $tokens = $this->tokens;
+        $pos--;
+        for (; $pos >= 0; $pos--) {
+            $token = $tokens[$pos];
+            $type = $token[Lexer::TYPE_OFFSET];
+            if ($type === $expectedTokenType) {
+                return true;
+            }
+            if (!in_array($type, [
+                Lexer::TOKEN_HORIZONTAL_WS,
+                Lexer::TOKEN_PHPDOC_EOL,
+            ], true)) {
+                break;
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * Check whether the position is directly preceded by a certain token type.
-	 *
-	 * During this check TOKEN_HORIZONTAL_WS and TOKEN_PHPDOC_EOL are skipped
-	 */
-	public function hasTokenImmediatelyBefore(int $pos, int $expectedTokenType): bool
-	{
-		$tokens = $this->tokens;
-		$pos--;
-		for (; $pos >= 0; $pos--) {
-			$token = $tokens[$pos];
-			$type = $token[Lexer::TYPE_OFFSET];
-			if ($type === $expectedTokenType) {
-				return true;
-			}
-			if (!in_array($type, [
-				Lexer::TOKEN_HORIZONTAL_WS,
-				Lexer::TOKEN_PHPDOC_EOL,
-			], true)) {
-				break;
-			}
-		}
-		return false;
-	}
+    /**
+     * Check whether the position is directly followed by a certain token type.
+     *
+     * During this check TOKEN_HORIZONTAL_WS and TOKEN_PHPDOC_EOL are skipped
+     */
+    public function hasTokenImmediatelyAfter(int $pos, int $expectedTokenType): bool
+    {
+        $tokens = $this->tokens;
+        $pos++;
+        for ($c = count($tokens); $pos < $c; $pos++) {
+            $token = $tokens[$pos];
+            $type = $token[Lexer::TYPE_OFFSET];
+            if ($type === $expectedTokenType) {
+                return true;
+            }
+            if (!in_array($type, [
+                Lexer::TOKEN_HORIZONTAL_WS,
+                Lexer::TOKEN_PHPDOC_EOL,
+            ], true)) {
+                break;
+            }
+        }
 
-	/**
-	 * Check whether the position is directly followed by a certain token type.
-	 *
-	 * During this check TOKEN_HORIZONTAL_WS and TOKEN_PHPDOC_EOL are skipped
-	 */
-	public function hasTokenImmediatelyAfter(int $pos, int $expectedTokenType): bool
-	{
-		$tokens = $this->tokens;
-		$pos++;
-		for ($c = count($tokens); $pos < $c; $pos++) {
-			$token = $tokens[$pos];
-			$type = $token[Lexer::TYPE_OFFSET];
-			if ($type === $expectedTokenType) {
-				return true;
-			}
-			if (!in_array($type, [
-				Lexer::TOKEN_HORIZONTAL_WS,
-				Lexer::TOKEN_PHPDOC_EOL,
-			], true)) {
-				break;
-			}
-		}
+        return false;
+    }
 
-		return false;
-	}
+    public function getDetectedNewline(): ?string
+    {
+        return $this->newline;
+    }
 
-	public function getDetectedNewline(): ?string
-	{
-		return $this->newline;
-	}
-
-	/**
-	 * Whether the given position is immediately surrounded by parenthesis.
-	 */
-	public function hasParentheses(int $startPos, int $endPos): bool
-	{
-		return $this->hasTokenImmediatelyBefore($startPos, Lexer::TOKEN_OPEN_PARENTHESES)
-			&& $this->hasTokenImmediatelyAfter($endPos, Lexer::TOKEN_CLOSE_PARENTHESES);
-	}
+    /**
+     * Whether the given position is immediately surrounded by parenthesis.
+     */
+    public function hasParentheses(int $startPos, int $endPos): bool
+    {
+        return $this->hasTokenImmediatelyBefore($startPos, Lexer::TOKEN_OPEN_PARENTHESES)
+            && $this->hasTokenImmediatelyAfter($endPos, Lexer::TOKEN_CLOSE_PARENTHESES);
+    }
 
 }

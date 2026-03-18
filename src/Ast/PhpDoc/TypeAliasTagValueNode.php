@@ -1,43 +1,45 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Ast\PhpDoc;
 
 use PHPStan\PhpDocParser\Ast\NodeAttributes;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
+
 use function trim;
 
 class TypeAliasTagValueNode implements PhpDocTagValueNode
 {
+    use NodeAttributes;
 
-	use NodeAttributes;
+    public string $alias;
 
-	public string $alias;
+    public TypeNode $type;
 
-	public TypeNode $type;
+    public function __construct(string $alias, TypeNode $type)
+    {
+        $this->alias = $alias;
+        $this->type = $type;
+    }
 
-	public function __construct(string $alias, TypeNode $type)
-	{
-		$this->alias = $alias;
-		$this->type = $type;
-	}
+    public function __toString(): string
+    {
+        return trim("{$this->alias} {$this->type}");
+    }
 
-	public function __toString(): string
-	{
-		return trim("{$this->alias} {$this->type}");
-	}
-
-	/**
-	 * @param array<string, mixed> $properties
-	 */
-	public static function __set_state(array $properties): self
-	{
-		$instance = new self($properties['alias'], $properties['type']);
-		if (isset($properties['attributes'])) {
-			foreach ($properties['attributes'] as $key => $value) {
-				$instance->setAttribute($key, $value);
-			}
-		}
-		return $instance;
-	}
+    /**
+     * @param array<string, mixed> $properties
+     */
+    public static function __set_state(array $properties): self
+    {
+        $instance = new self($properties['alias'], $properties['type']);
+        if (isset($properties['attributes'])) {
+            foreach ($properties['attributes'] as $key => $value) {
+                $instance->setAttribute($key, $value);
+            }
+        }
+        return $instance;
+    }
 
 }

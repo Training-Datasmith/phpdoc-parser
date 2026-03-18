@@ -1,10 +1,11 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace PHPStan\PhpDocParser\Parser\Doctrine;
 
 class Y
 {
-
-	public const SOME = 1;
+    public const SOME = 1;
 
 }
