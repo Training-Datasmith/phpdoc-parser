@@ -167,7 +167,7 @@ final class Printer
 
 	public function printFormatPreserving(PhpDocNode $node, PhpDocNode $originalNode, TokenIterator $originalTokens): string
 	{
-		$this->differ = new Differ(static function ($a, $b) {
+		$this->differ = new Differ(static function ($a, $b): bool {
 			if ($a instanceof Node && $b instanceof Node) {
 				return $a === $b->getAttribute(Attribute::ORIGINAL_NODE);
 			}

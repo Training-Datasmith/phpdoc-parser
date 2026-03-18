@@ -96,16 +96,9 @@ class Lexer
 
 	public const VALUE_OFFSET = 0;
 	public const TYPE_OFFSET = 1;
-	public const LINE_OFFSET = 2;
-
-	private ParserConfig $config; // @phpstan-ignore property.onlyWritten
+	public const LINE_OFFSET = 2; // @phpstan-ignore property.onlyWritten
 
 	private ?string $regexp = null;
-
-	public function __construct(ParserConfig $config)
-	{
-		$this->config = $config;
-	}
 
 	/**
 	 * @return list<array{string, int, int}>

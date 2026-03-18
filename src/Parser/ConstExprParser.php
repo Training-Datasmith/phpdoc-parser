@@ -72,9 +72,8 @@ class ConstExprParser
 				$startIndex,
 			);
 		}
-
-		if ($tokens->isCurrentTokenType(Lexer::TOKEN_SINGLE_QUOTED_STRING, Lexer::TOKEN_DOUBLE_QUOTED_STRING)) {
-			if ($this->parseDoctrineStrings) {
+        if ($tokens->isCurrentTokenType(Lexer::TOKEN_SINGLE_QUOTED_STRING, Lexer::TOKEN_DOUBLE_QUOTED_STRING)) {
+            if ($this->parseDoctrineStrings) {
 				if ($tokens->isCurrentTokenType(Lexer::TOKEN_SINGLE_QUOTED_STRING)) {
 					throw new ParserException(
 						$tokens->currentTokenValue(),
@@ -96,12 +95,10 @@ class ConstExprParser
 					$startIndex,
 				);
 			}
-
-			$value = StringUnescaper::unescapeString($tokens->currentTokenValue());
-			$type = $tokens->currentTokenType();
-			$tokens->next();
-
-			return $this->enrichWithAttributes(
+            $value = StringUnescaper::unescapeString($tokens->currentTokenValue());
+            $type = $tokens->currentTokenType();
+            $tokens->next();
+            return $this->enrichWithAttributes(
 				$tokens,
 				new Ast\ConstExpr\ConstExprStringNode(
 					$value,
@@ -112,12 +109,11 @@ class ConstExprParser
 				$startLine,
 				$startIndex,
 			);
-
-		} elseif ($tokens->isCurrentTokenType(Lexer::TOKEN_IDENTIFIER)) {
-			$identifier = $tokens->currentTokenValue();
-			$tokens->next();
-
-			switch (strtolower($identifier)) {
+        }
+        if ($tokens->isCurrentTokenType(Lexer::TOKEN_IDENTIFIER)) {
+            $identifier = $tokens->currentTokenValue();
+            $tokens->next();
+            switch (strtolower($identifier)) {
 				case 'true':
 					return $this->enrichWithAttributes(
 						$tokens,
@@ -143,8 +139,7 @@ class ConstExprParser
 					$tokens->consumeTokenType(Lexer::TOKEN_OPEN_PARENTHESES);
 					return $this->parseArray($tokens, Lexer::TOKEN_CLOSE_PARENTHESES, $startIndex);
 			}
-
-			if ($tokens->tryConsumeTokenType(Lexer::TOKEN_DOUBLE_COLON)) {
+            if ($tokens->tryConsumeTokenType(Lexer::TOKEN_DOUBLE_COLON)) {
 				$classConstantName = '';
 				$lastType = null;
 				while (true) {
@@ -183,17 +178,17 @@ class ConstExprParser
 				);
 
 			}
-
-			return $this->enrichWithAttributes(
+            return $this->enrichWithAttributes(
 				$tokens,
 				new Ast\ConstExpr\ConstFetchNode('', $identifier),
 				$startLine,
 				$startIndex,
 			);
+        }
 
-		} elseif ($tokens->tryConsumeTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
-			return $this->parseArray($tokens, Lexer::TOKEN_CLOSE_SQUARE_BRACKET, $startIndex);
-		}
+		if ($tokens->tryConsumeTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
+            return $this->parseArray($tokens, Lexer::TOKEN_CLOSE_SQUARE_BRACKET, $startIndex);
+        }
 
 		throw new ParserException(
 			$tokens->currentTokenValue(),

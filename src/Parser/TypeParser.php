@@ -207,7 +207,7 @@ class TypeParser
 					if ($type->name === 'object') {
 						$type = $this->parseObjectShape($tokens);
 					} else {
-						$type = $this->parseArrayShape($tokens, $type, $type->name);
+						$type = $this->parseArrayShape($tokens, $type->name);
 					}
 
 					if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
@@ -219,9 +219,10 @@ class TypeParser
 				}
 
 				return $this->enrichWithAttributes($tokens, $type, $startLine, $startIndex);
-			} else {
-				$tokens->rollback(); // because of ConstFetchNode
 			}
+            $tokens->rollback();
+            // because of ConstFetchNode
+
 		} else {
 			$tokens->dropSavePoint(); // because of ConstFetchNode
 		}
@@ -251,7 +252,7 @@ class TypeParser
 				$startIndex,
 			);
 			if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
-				$type = $this->tryParseArrayOrOffsetAccess($tokens, $type);
+				return $this->tryParseArrayOrOffsetAccess($tokens, $type);
 			}
 
 			return $type;
@@ -653,33 +654,33 @@ class TypeParser
 	{
 		$startLine = $tokens->currentTokenLine();
 		$startIndex = $tokens->currentTokenIndex();
-		if ($tokens->isCurrentTokenType(Lexer::TOKEN_NULLABLE)) {
-			return $this->parseNullable($tokens);
-
-		} elseif ($tokens->tryConsumeTokenType(Lexer::TOKEN_OPEN_PARENTHESES)) {
-			$type = $this->subParse($tokens);
-			$tokens->consumeTokenType(Lexer::TOKEN_CLOSE_PARENTHESES);
-			if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
-				$type = $this->tryParseArrayOrOffsetAccess($tokens, $type);
+        if ($tokens->isCurrentTokenType(Lexer::TOKEN_NULLABLE)) {
+            return $this->parseNullable($tokens);
+        }
+        if ($tokens->tryConsumeTokenType(Lexer::TOKEN_OPEN_PARENTHESES)) {
+            $type = $this->subParse($tokens);
+            $tokens->consumeTokenType(Lexer::TOKEN_CLOSE_PARENTHESES);
+            if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
+				return $this->tryParseArrayOrOffsetAccess($tokens, $type);
 			}
-
-			return $type;
-		} elseif ($tokens->tryConsumeTokenType(Lexer::TOKEN_THIS_VARIABLE)) {
-			$type = new Ast\Type\ThisTypeNode();
-			if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
-				$type = $this->tryParseArrayOrOffsetAccess($tokens, $this->enrichWithAttributes(
+            return $type;
+        }
+		if ($tokens->tryConsumeTokenType(Lexer::TOKEN_THIS_VARIABLE)) {
+            $type = new Ast\Type\ThisTypeNode();
+            if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
+				return $this->tryParseArrayOrOffsetAccess($tokens, $this->enrichWithAttributes(
 					$tokens,
 					$type,
 					$startLine,
 					$startIndex,
 				));
 			}
-
-			return $type;
-		} else {
-			$currentTokenValue = $tokens->currentTokenValue();
-			$tokens->pushSavePoint(); // because of ConstFetchNode
-			if ($tokens->tryConsumeTokenType(Lexer::TOKEN_IDENTIFIER)) {
+            return $type;
+        }
+        $currentTokenValue = $tokens->currentTokenValue();
+        $tokens->pushSavePoint();
+        // because of ConstFetchNode
+        if ($tokens->tryConsumeTokenType(Lexer::TOKEN_IDENTIFIER)) {
 				$type = new Ast\Type\IdentifierTypeNode($currentTokenValue);
 
 				if (!$tokens->isCurrentTokenType(Lexer::TOKEN_DOUBLE_COLON)) {
@@ -720,12 +721,7 @@ class TypeParser
 						if ($type->name === 'object') {
 							$type = $this->parseObjectShape($tokens);
 						} else {
-							$type = $this->parseArrayShape($tokens, $this->enrichWithAttributes(
-								$tokens,
-								$type,
-								$startLine,
-								$startIndex,
-							), $type->name);
+							$type = $this->parseArrayShape($tokens, $type->name);
 						}
 
 						if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
@@ -739,13 +735,13 @@ class TypeParser
 					}
 
 					return $type;
-				} else {
-					$tokens->rollback(); // because of ConstFetchNode
 				}
+            $tokens->rollback();
+            // because of ConstFetchNode
+
 			} else {
 				$tokens->dropSavePoint(); // because of ConstFetchNode
 			}
-		}
 
 		$currentTokenValue = $tokens->currentTokenValue();
 		$currentTokenType = $tokens->currentTokenType();
@@ -772,7 +768,7 @@ class TypeParser
 				$startIndex,
 			);
 			if ($tokens->isCurrentTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
-				$type = $this->tryParseArrayOrOffsetAccess($tokens, $type);
+				return $this->tryParseArrayOrOffsetAccess($tokens, $type);
 			}
 
 			return $type;
@@ -857,7 +853,7 @@ class TypeParser
 	 * @phpstan-impure
 	 * @param Ast\Type\ArrayShapeNode::KIND_* $kind
 	 */
-	private function parseArrayShape(TokenIterator $tokens, Ast\Type\TypeNode $type, string $kind): Ast\Type\ArrayShapeNode
+	private function parseArrayShape(TokenIterator $tokens, string $kind): Ast\Type\ArrayShapeNode
 	{
 		$tokens->consumeTokenType(Lexer::TOKEN_OPEN_CURLY_BRACKET);
 
@@ -955,7 +951,7 @@ class TypeParser
 	 * @phpstan-impure
 	 * @return Ast\ConstExpr\ConstExprIntegerNode|Ast\ConstExpr\ConstExprStringNode|Ast\ConstExpr\ConstFetchNode|Ast\Type\IdentifierTypeNode
 	 */
-	private function parseArrayShapeKey(TokenIterator $tokens)
+	private function parseArrayShapeKey(TokenIterator $tokens): \PHPStan\PhpDocParser\Ast\Node
 	{
 		$startIndex = $tokens->currentTokenIndex();
 		$startLine = $tokens->currentTokenLine();
@@ -1104,7 +1100,7 @@ class TypeParser
 	 * @phpstan-impure
 	 * @return Ast\ConstExpr\ConstExprStringNode|Ast\Type\IdentifierTypeNode
 	 */
-	private function parseObjectShapeKey(TokenIterator $tokens)
+	private function parseObjectShapeKey(TokenIterator $tokens): \PHPStan\PhpDocParser\Ast\Node
 	{
 		$startLine = $tokens->currentTokenLine();
 		$startIndex = $tokens->currentTokenIndex();

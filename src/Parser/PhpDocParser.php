@@ -440,7 +440,7 @@ class PhpDocParser
 				case '@psalm-template-contravariant':
 					$tagValue = $this->typeParser->parseTemplateTagValue(
 						$tokens,
-						fn ($tokens) => $this->parseOptionalDescription($tokens, true),
+						fn (\PHPStan\PhpDocParser\Parser\TokenIterator $tokens): string => $this->parseOptionalDescription($tokens, true),
 					);
 					break;
 
@@ -1134,12 +1134,13 @@ class PhpDocParser
 		$type = $this->typeParser->parse($tokens);
 		$parameter = $this->parseAssertParameter($tokens);
 		$description = $this->parseOptionalDescription($tokens, false);
+        if (array_key_exists('method', $parameter)) {
+            return new Ast\PhpDoc\AssertTagMethodValueNode($type, $parameter['parameter'], $parameter['method'], $isNegated, $description, $isEquality);
+        }
 
-		if (array_key_exists('method', $parameter)) {
-			return new Ast\PhpDoc\AssertTagMethodValueNode($type, $parameter['parameter'], $parameter['method'], $isNegated, $description, $isEquality);
-		} elseif (array_key_exists('property', $parameter)) {
-			return new Ast\PhpDoc\AssertTagPropertyValueNode($type, $parameter['parameter'], $parameter['property'], $isNegated, $description, $isEquality);
-		}
+		if (array_key_exists('property', $parameter)) {
+            return new Ast\PhpDoc\AssertTagPropertyValueNode($type, $parameter['parameter'], $parameter['property'], $isNegated, $description, $isEquality);
+        }
 
 		return new Ast\PhpDoc\AssertTagValueNode($type, $parameter['parameter'], $isNegated, $description, $isEquality);
 	}

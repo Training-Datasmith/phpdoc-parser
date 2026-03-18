@@ -68,7 +68,7 @@ class ConstExprStringNode implements ConstExprNode
             | (?<=[\xF0-\xF4])[\x80-\xBF](?![\x80-\xBF]{2}) # Short 4 byte sequence
             | (?<=[\xF0-\xF4][\x80-\xBF])[\x80-\xBF](?![\x80-\xBF]) # Short 4 byte sequence (2)
         )/x';
-		return preg_replace_callback($regex, static function ($matches) {
+		return preg_replace_callback($regex, static function ($matches): string {
 			assert(strlen($matches[0]) === 1);
 			$hex = dechex(ord($matches[0]));
 
