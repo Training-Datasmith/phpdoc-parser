@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Const_Expr;
 
-namespace PHPStan\PhpDocParser\Ast\ConstExpr;
-
-use PHPStan\PhpDocParser\Ast\Node;
-
-interface ConstExprNode extends Node
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+interface Const_Expr_Node extends Node
 {
 }

@@ -1,21 +1,17 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Node_Visitor;
 
-namespace PHPStan\PhpDocParser\Ast\NodeVisitor;
-
-use PHPStan\PhpDocParser\Ast\AbstractNodeVisitor;
-use PHPStan\PhpDocParser\Ast\Attribute;
-use PHPStan\PhpDocParser\Ast\Node;
-
-final class CloningVisitor extends AbstractNodeVisitor
+use Php_Stan\Php_Doc_Parser\Ast\Abstract_Node_Visitor;
+use Php_Stan\Php_Doc_Parser\Ast\Attribute;
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+final class Cloning_Visitor extends Abstract_Node_Visitor
 {
-    public function enterNode(Node $originalNode): Node
+    public function enter_node(Node $original_node): Node
     {
-        $node = clone $originalNode;
-        $node->setAttribute(Attribute::ORIGINAL_NODE, $originalNode);
-
+        $node = clone $original_node;
+        $node->set_attribute(Attribute::ORIGINAL_NODE, $original_node);
         return $node;
     }
-
 }

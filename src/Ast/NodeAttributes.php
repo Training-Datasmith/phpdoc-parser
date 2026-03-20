@@ -1,20 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast;
 
 use function array_key_exists;
-
-trait NodeAttributes
+trait Node_Attributes
 {
     /** @var array<string, mixed> */
     private array $attributes = [];
-
     /**
      * @param mixed $value
      */
-    public function setAttribute(string $key, $value): void
+    public function set_attribute(string $key, $value): void
     {
         if ($value === null) {
             unset($this->attributes[$key]);
@@ -22,22 +19,18 @@ trait NodeAttributes
         }
         $this->attributes[$key] = $value;
     }
-
-    public function hasAttribute(string $key): bool
+    public function has_attribute(string $key): bool
     {
         return array_key_exists($key, $this->attributes);
     }
-
     /**
      * @return mixed
      */
-    public function getAttribute(string $key)
+    public function get_attribute(string $key)
     {
-        if ($this->hasAttribute($key)) {
+        if ($this->has_attribute($key)) {
             return $this->attributes[$key];
         }
-
         return null;
     }
-
 }

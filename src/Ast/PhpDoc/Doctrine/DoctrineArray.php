@@ -1,21 +1,16 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Doctrine;
 
 use function implode;
-
-use PHPStan\PhpDocParser\Ast\Node;
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class DoctrineArray implements Node
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Doctrine_Array implements Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     /** @var list<DoctrineArrayItem> */
     public array $items;
-
     /**
      * @param list<DoctrineArrayItem> $items
      */
@@ -23,14 +18,11 @@ class DoctrineArray implements Node
     {
         $this->items = $items;
     }
-
     public function __toString(): string
     {
         $items = implode(', ', $this->items);
-
         return '{' . $items . '}';
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -39,10 +31,9 @@ class DoctrineArray implements Node
         $instance = new self($properties['items']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

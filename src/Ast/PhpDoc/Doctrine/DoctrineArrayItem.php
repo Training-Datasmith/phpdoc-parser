@@ -1,30 +1,25 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Doctrine;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine;
-
-use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprIntegerNode;
-use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprStringNode;
-use PHPStan\PhpDocParser\Ast\ConstExpr\ConstFetchNode;
-use PHPStan\PhpDocParser\Ast\Node;
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Const_Expr\Const_Expr_Integer_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Const_Expr\Const_Expr_String_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Const_Expr\Const_Fetch_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Identifier_Type_Node;
 /**
  * @phpstan-import-type ValueType from DoctrineArgument
  * @phpstan-type KeyType = ConstExprIntegerNode|ConstExprStringNode|IdentifierTypeNode|ConstFetchNode|null
  */
-class DoctrineArrayItem implements Node
+class Doctrine_Array_Item implements Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     /** @var KeyType */
     public $key;
-
     /** @var ValueType */
     public $value;
-
     /**
      * @param KeyType $key
      * @param ValueType $value
@@ -34,16 +29,13 @@ class DoctrineArrayItem implements Node
         $this->key = $key;
         $this->value = $value;
     }
-
     public function __toString(): string
     {
         if ($this->key === null) {
             return (string) $this->value;
         }
-
         return $this->key . '=' . $this->value;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -52,10 +44,9 @@ class DoctrineArrayItem implements Node
         $instance = new self($properties['key'], $properties['value']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

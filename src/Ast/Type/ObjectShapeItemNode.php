@@ -1,50 +1,35 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Type;
 
-namespace PHPStan\PhpDocParser\Ast\Type;
-
-use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprStringNode;
-use PHPStan\PhpDocParser\Ast\Node;
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Const_Expr\Const_Expr_String_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function sprintf;
-
-class ObjectShapeItemNode implements Node
+class Object_Shape_Item_Node implements Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     /** @var ConstExprStringNode|IdentifierTypeNode */
-    public $keyName;
-
+    public $key_name;
     public bool $optional;
-
-    public TypeNode $valueType;
-
+    public Type_Node $value_type;
     /**
      * @param ConstExprStringNode|IdentifierTypeNode $keyName
      */
-    public function __construct($keyName, bool $optional, TypeNode $valueType)
+    public function __construct($key_name, bool $optional, Type_Node $value_type)
     {
-        $this->keyName = $keyName;
+        $this->key_name = $key_name;
         $this->optional = $optional;
-        $this->valueType = $valueType;
+        $this->value_type = $value_type;
     }
-
     public function __toString(): string
     {
-        if ($this->keyName !== null) {
-            return sprintf(
-                '%s%s: %s',
-                (string) $this->keyName,
-                $this->optional ? '?' : '',
-                (string) $this->valueType,
-            );
+        if ($this->key_name !== null) {
+            return sprintf('%s%s: %s', (string) $this->key_name, $this->optional ? '?' : '', (string) $this->value_type);
         }
-
-        return (string) $this->valueType;
+        return (string) $this->value_type;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -53,10 +38,9 @@ class ObjectShapeItemNode implements Node
         $instance = new self($properties['keyName'], $properties['optional'], $properties['valueType']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

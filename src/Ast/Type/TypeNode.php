@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Type;
 
-namespace PHPStan\PhpDocParser\Ast\Type;
-
-use PHPStan\PhpDocParser\Ast\Node;
-
-interface TypeNode extends Node
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+interface Type_Node extends Node
 {
 }

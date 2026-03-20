@@ -1,36 +1,26 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Doctrine;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Php_Doc_Tag_Value_Node;
 use function trim;
-
-class DoctrineTagValueNode implements PhpDocTagValueNode
+class Doctrine_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
-    public DoctrineAnnotation $annotation;
-
+    use Node_Attributes;
+    public Doctrine_Annotation $annotation;
     /** @var string (may be empty) */
     public string $description;
-
-    public function __construct(
-        DoctrineAnnotation $annotation,
-        string $description
-    ) {
+    public function __construct(Doctrine_Annotation $annotation, string $description)
+    {
         $this->annotation = $annotation;
         $this->description = $description;
     }
-
     public function __toString(): string
     {
         return trim("{$this->annotation} {$this->description}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -39,10 +29,9 @@ class DoctrineTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['annotation'], $properties['description']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

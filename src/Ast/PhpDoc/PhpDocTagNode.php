@@ -1,37 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine\DoctrineTagValueNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Doctrine\Doctrine_Tag_Value_Node;
 use function trim;
-
-class PhpDocTagNode implements PhpDocChildNode
+class Php_Doc_Tag_Node implements Php_Doc_Child_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public string $name;
-
-    public PhpDocTagValueNode $value;
-
-    public function __construct(string $name, PhpDocTagValueNode $value)
+    public Php_Doc_Tag_Value_Node $value;
+    public function __construct(string $name, Php_Doc_Tag_Value_Node $value)
     {
         $this->name = $name;
         $this->value = $value;
     }
-
     public function __toString(): string
     {
-        if ($this->value instanceof DoctrineTagValueNode) {
+        if ($this->value instanceof Doctrine_Tag_Value_Node) {
             return (string) $this->value;
         }
-
         return trim("{$this->name} {$this->value}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -40,10 +31,9 @@ class PhpDocTagNode implements PhpDocChildNode
         $instance = new self($properties['name'], $properties['value']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

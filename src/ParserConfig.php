@@ -1,25 +1,20 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser;
 
-namespace PHPStan\PhpDocParser;
-
-class ParserConfig
+class Parser_Config
 {
-    public bool $useLinesAttributes;
-
-    public bool $useIndexAttributes;
-
-    public bool $useCommentsAttributes;
-
+    public bool $use_lines_attributes;
+    public bool $use_index_attributes;
+    public bool $use_comments_attributes;
     /**
      * @param array{lines?: bool, indexes?: bool, comments?: bool} $usedAttributes
      */
-    public function __construct(array $usedAttributes)
+    public function __construct(array $used_attributes)
     {
-        $this->useLinesAttributes = $usedAttributes['lines'] ?? false;
-        $this->useIndexAttributes = $usedAttributes['indexes'] ?? false;
-        $this->useCommentsAttributes = $usedAttributes['comments'] ?? false;
+        $this->use_lines_attributes = $used_attributes['lines'] ?? false;
+        $this->use_index_attributes = $used_attributes['indexes'] ?? false;
+        $this->use_comments_attributes = $used_attributes['comments'] ?? false;
     }
-
 }

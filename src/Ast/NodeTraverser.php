@@ -1,8 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast;
 
 use function array_keys;
 use function array_pop;
@@ -12,22 +11,19 @@ use function get_class;
 use function get_object_vars;
 use function gettype;
 use function is_array;
-
 use LogicException;
-use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocChildNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode;
-use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Const_Expr\Const_Expr_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Php_Doc_Child_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Php_Doc_Tag_Value_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Type_Node;
 use function sprintf;
-
 /**
  * Inspired by https://github.com/nikic/PHP-Parser/tree/36a6dcd04e7b0285e8f0868f44bd4927802f7df1
  *
  * Copyright (c) 2011, Nikita Popov
  * All rights reserved.
  */
-final class NodeTraverser
+final class Node_Traverser
 {
     /**
      * If NodeVisitor::enterNode() returns DONT_TRAVERSE_CHILDREN, child nodes
@@ -37,7 +33,6 @@ final class NodeTraverser
      * node and leaveNode() will also be invoked for the current node.
      */
     public const DONT_TRAVERSE_CHILDREN = 1;
-
     /**
      * If NodeVisitor::enterNode() or NodeVisitor::leaveNode() returns
      * STOP_TRAVERSAL, traversal is aborted.
@@ -45,7 +40,6 @@ final class NodeTraverser
      * The afterTraverse() method will still be invoked.
      */
     public const STOP_TRAVERSAL = 2;
-
     /**
      * If NodeVisitor::leaveNode() returns REMOVE_NODE for a node that occurs
      * in an array, it will be removed from the array.
@@ -54,7 +48,6 @@ final class NodeTraverser
      * removed node.
      */
     public const REMOVE_NODE = 3;
-
     /**
      * If NodeVisitor::enterNode() returns DONT_TRAVERSE_CURRENT_AND_CHILDREN, child nodes
      * of the current node will not be traversed for any visitors.
@@ -63,13 +56,10 @@ final class NodeTraverser
      * leaveNode() will be invoked for visitors that has enterNode() method invoked.
      */
     public const DONT_TRAVERSE_CURRENT_AND_CHILDREN = 4;
-
     /** @var list<NodeVisitor> Visitors */
     private array $visitors = [];
-
     /** @var bool Whether traversal should be stopped */
-    private bool $stopTraversal;
-
+    private bool $stop_traversal;
     /**
      * @param list<NodeVisitor> $visitors
      */
@@ -77,7 +67,6 @@ final class NodeTraverser
     {
         $this->visitors = $visitors;
     }
-
     /**
      * Traverses an array of nodes using the registered visitors.
      *
@@ -87,31 +76,24 @@ final class NodeTraverser
      */
     public function traverse(array $nodes): array
     {
-        $this->stopTraversal = false;
-
+        $this->stop_traversal = false;
         foreach ($this->visitors as $visitor) {
-            $return = $visitor->beforeTraverse($nodes);
+            $return = $visitor->before_traverse($nodes);
             if ($return === null) {
                 continue;
             }
-
             $nodes = $return;
         }
-
-        $nodes = $this->traverseArray($nodes);
-
+        $nodes = $this->traverse_array($nodes);
         foreach ($this->visitors as $visitor) {
-            $return = $visitor->afterTraverse($nodes);
+            $return = $visitor->after_traverse($nodes);
             if ($return === null) {
                 continue;
             }
-
             $nodes = $return;
         }
-
         return $nodes;
     }
-
     /**
      * Recursively traverse a node.
      *
@@ -119,85 +101,69 @@ final class NodeTraverser
      *
      * @return Node Result of traversal (may be original node or new one)
      */
-    private function traverseNode(Node $node): Node
+    private function traverse_node(Node $node): Node
     {
-        $subNodeNames = array_keys(get_object_vars($node));
-        foreach ($subNodeNames as $name) {
-            $subNode = & $node->$name;
-
-            if (is_array($subNode)) {
-                $subNode = $this->traverseArray($subNode);
-                if ($this->stopTraversal) {
+        $sub_node_names = array_keys(get_object_vars($node));
+        foreach ($sub_node_names as $name) {
+            $sub_node =& $node->{$name};
+            if (is_array($sub_node)) {
+                $sub_node = $this->traverse_array($sub_node);
+                if ($this->stop_traversal) {
                     break;
                 }
-            } elseif ($subNode instanceof Node) {
-                $traverseChildren = true;
-                $breakVisitorIndex = null;
-
-                foreach ($this->visitors as $visitorIndex => $visitor) {
-                    $return = $visitor->enterNode($subNode);
+            } elseif ($sub_node instanceof Node) {
+                $traverse_children = true;
+                $break_visitor_index = null;
+                foreach ($this->visitors as $visitor_index => $visitor) {
+                    $return = $visitor->enter_node($sub_node);
                     if ($return === null) {
                         continue;
                     }
-
                     if ($return instanceof Node) {
-                        $this->ensureReplacementReasonable($subNode, $return);
-                        $subNode = $return;
+                        $this->ensure_replacement_reasonable($sub_node, $return);
+                        $sub_node = $return;
                     } elseif ($return === self::DONT_TRAVERSE_CHILDREN) {
-                        $traverseChildren = false;
+                        $traverse_children = false;
                     } elseif ($return === self::DONT_TRAVERSE_CURRENT_AND_CHILDREN) {
-                        $traverseChildren = false;
-                        $breakVisitorIndex = $visitorIndex;
+                        $traverse_children = false;
+                        $break_visitor_index = $visitor_index;
                         break;
                     } elseif ($return === self::STOP_TRAVERSAL) {
-                        $this->stopTraversal = true;
+                        $this->stop_traversal = true;
                         break 2;
                     } else {
-                        throw new LogicException(
-                            'enterNode() returned invalid value of type ' . gettype($return),
-                        );
+                        throw new LogicException('enterNode() returned invalid value of type ' . gettype($return));
                     }
                 }
-
-                if ($traverseChildren) {
-                    $subNode = $this->traverseNode($subNode);
-                    if ($this->stopTraversal) {
+                if ($traverse_children) {
+                    $sub_node = $this->traverse_node($sub_node);
+                    if ($this->stop_traversal) {
                         break;
                     }
                 }
-
-                foreach ($this->visitors as $visitorIndex => $visitor) {
-                    $return = $visitor->leaveNode($subNode);
-
+                foreach ($this->visitors as $visitor_index => $visitor) {
+                    $return = $visitor->leave_node($sub_node);
                     if ($return !== null) {
                         if ($return instanceof Node) {
-                            $this->ensureReplacementReasonable($subNode, $return);
-                            $subNode = $return;
+                            $this->ensure_replacement_reasonable($sub_node, $return);
+                            $sub_node = $return;
                         } elseif ($return === self::STOP_TRAVERSAL) {
-                            $this->stopTraversal = true;
+                            $this->stop_traversal = true;
                             break 2;
                         } elseif (is_array($return)) {
-                            throw new LogicException(
-                                'leaveNode() may only return an array ' .
-                                'if the parent structure is an array',
-                            );
+                            throw new LogicException('leaveNode() may only return an array ' . 'if the parent structure is an array');
                         } else {
-                            throw new LogicException(
-                                'leaveNode() returned invalid value of type ' . gettype($return),
-                            );
+                            throw new LogicException('leaveNode() returned invalid value of type ' . gettype($return));
                         }
                     }
-
-                    if ($breakVisitorIndex === $visitorIndex) {
+                    if ($break_visitor_index === $visitor_index) {
                         break;
                     }
                 }
             }
         }
-
         return $node;
     }
-
     /**
      * Recursively traverse array (usually of nodes).
      *
@@ -205,77 +171,66 @@ final class NodeTraverser
      *
      * @return mixed[] Result of traversal (may be original array or changed one)
      */
-    private function traverseArray(array $nodes): array
+    private function traverse_array(array $nodes): array
     {
-        $doNodes = [];
-
+        $do_nodes = [];
         foreach ($nodes as $i => &$node) {
             if ($node instanceof Node) {
-                $traverseChildren = true;
-                $breakVisitorIndex = null;
-
-                foreach ($this->visitors as $visitorIndex => $visitor) {
-                    $return = $visitor->enterNode($node);
+                $traverse_children = true;
+                $break_visitor_index = null;
+                foreach ($this->visitors as $visitor_index => $visitor) {
+                    $return = $visitor->enter_node($node);
                     if ($return === null) {
                         continue;
                     }
-
                     if ($return instanceof Node) {
-                        $this->ensureReplacementReasonable($node, $return);
+                        $this->ensure_replacement_reasonable($node, $return);
                         $node = $return;
                     } elseif (is_array($return)) {
-                        $doNodes[] = [$i, $return];
+                        $do_nodes[] = [$i, $return];
                         continue 2;
                     } elseif ($return === self::REMOVE_NODE) {
-                        $doNodes[] = [$i, []];
+                        $do_nodes[] = [$i, []];
                         continue 2;
                     } elseif ($return === self::DONT_TRAVERSE_CHILDREN) {
-                        $traverseChildren = false;
+                        $traverse_children = false;
                     } elseif ($return === self::DONT_TRAVERSE_CURRENT_AND_CHILDREN) {
-                        $traverseChildren = false;
-                        $breakVisitorIndex = $visitorIndex;
+                        $traverse_children = false;
+                        $break_visitor_index = $visitor_index;
                         break;
                     } elseif ($return === self::STOP_TRAVERSAL) {
-                        $this->stopTraversal = true;
+                        $this->stop_traversal = true;
                         break 2;
                     } else {
-                        throw new LogicException(
-                            'enterNode() returned invalid value of type ' . gettype($return),
-                        );
+                        throw new LogicException('enterNode() returned invalid value of type ' . gettype($return));
                     }
                 }
-
-                if ($traverseChildren) {
-                    $node = $this->traverseNode($node);
-                    if ($this->stopTraversal) {
+                if ($traverse_children) {
+                    $node = $this->traverse_node($node);
+                    if ($this->stop_traversal) {
                         break;
                     }
                 }
-
-                foreach ($this->visitors as $visitorIndex => $visitor) {
-                    $return = $visitor->leaveNode($node);
-
+                foreach ($this->visitors as $visitor_index => $visitor) {
+                    $return = $visitor->leave_node($node);
                     if ($return !== null) {
                         if ($return instanceof Node) {
-                            $this->ensureReplacementReasonable($node, $return);
+                            $this->ensure_replacement_reasonable($node, $return);
                             $node = $return;
                         } elseif (is_array($return)) {
-                            $doNodes[] = [$i, $return];
+                            $do_nodes[] = [$i, $return];
                             break;
                         } elseif ($return === self::REMOVE_NODE) {
-                            $doNodes[] = [$i, []];
+                            $do_nodes[] = [$i, []];
                             break;
                         } elseif ($return === self::STOP_TRAVERSAL) {
-                            $this->stopTraversal = true;
+                            $this->stop_traversal = true;
                             break 2;
                         } else {
-                            throw new LogicException(
-                                'leaveNode() returned invalid value of type ' . gettype($return),
-                            );
+                            throw new LogicException('leaveNode() returned invalid value of type ' . gettype($return));
                         }
                     }
-
-                    if ($breakVisitorIndex === $visitorIndex) {
+                    if ($break_visitor_index === $visitor_index) {
                         break;
                     }
                 }
@@ -283,33 +238,26 @@ final class NodeTraverser
                 throw new LogicException('Invalid node structure: Contains nested arrays');
             }
         }
-
-        if (count($doNodes) > 0) {
-            while ([$i, $replace] = array_pop($doNodes)) {
+        if (count($do_nodes) > 0) {
+            while ([$i, $replace] = array_pop($do_nodes)) {
                 array_splice($nodes, $i, 1, $replace);
             }
         }
-
         return $nodes;
     }
-
-    private function ensureReplacementReasonable(Node $old, Node $new): void
+    private function ensure_replacement_reasonable(Node $old, Node $new): void
     {
-        if ($old instanceof TypeNode && !$new instanceof TypeNode) {
+        if ($old instanceof Type_Node && !$new instanceof Type_Node) {
             throw new LogicException(sprintf('Trying to replace TypeNode with %s', get_class($new)));
         }
-
-        if ($old instanceof ConstExprNode && !$new instanceof ConstExprNode) {
+        if ($old instanceof Const_Expr_Node && !$new instanceof Const_Expr_Node) {
             throw new LogicException(sprintf('Trying to replace ConstExprNode with %s', get_class($new)));
         }
-
-        if ($old instanceof PhpDocChildNode && !$new instanceof PhpDocChildNode) {
+        if ($old instanceof Php_Doc_Child_Node && !$new instanceof Php_Doc_Child_Node) {
             throw new LogicException(sprintf('Trying to replace PhpDocChildNode with %s', get_class($new)));
         }
-
-        if ($old instanceof PhpDocTagValueNode && !$new instanceof PhpDocTagValueNode) {
+        if ($old instanceof Php_Doc_Tag_Value_Node && !$new instanceof Php_Doc_Tag_Value_Node) {
             throw new LogicException(sprintf('Trying to replace PhpDocTagValueNode with %s', get_class($new)));
         }
     }
-
 }

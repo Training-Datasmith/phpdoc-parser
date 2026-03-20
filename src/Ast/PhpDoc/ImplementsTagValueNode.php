@@ -1,34 +1,26 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Generic_Type_Node;
 use function trim;
-
-class ImplementsTagValueNode implements PhpDocTagValueNode
+class Implements_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
-    public GenericTypeNode $type;
-
+    use Node_Attributes;
+    public Generic_Type_Node $type;
     /** @var string (may be empty) */
     public string $description;
-
-    public function __construct(GenericTypeNode $type, string $description)
+    public function __construct(Generic_Type_Node $type, string $description)
     {
         $this->type = $type;
         $this->description = $description;
     }
-
     public function __toString(): string
     {
         return trim("{$this->type} {$this->description}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -37,10 +29,9 @@ class ImplementsTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['type'], $properties['description']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

@@ -1,23 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Doctrine;
 
 use function implode;
-
-use PHPStan\PhpDocParser\Ast\Node;
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class DoctrineAnnotation implements Node
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Doctrine_Annotation implements Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public string $name;
-
     /** @var list<DoctrineArgument> */
     public array $arguments;
-
     /**
      * @param list<DoctrineArgument> $arguments
      */
@@ -26,13 +20,11 @@ class DoctrineAnnotation implements Node
         $this->name = $name;
         $this->arguments = $arguments;
     }
-
     public function __toString(): string
     {
         $arguments = implode(', ', $this->arguments);
         return $this->name . '(' . $arguments . ')';
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -41,10 +33,9 @@ class DoctrineAnnotation implements Node
         $instance = new self($properties['name'], $properties['arguments']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

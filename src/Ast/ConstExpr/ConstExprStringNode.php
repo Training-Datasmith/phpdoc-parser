@@ -1,61 +1,47 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast\ConstExpr;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Const_Expr;
 
 use function addcslashes;
 use function assert;
 use function dechex;
 use function ord;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function preg_replace_callback;
 use function sprintf;
 use function str_pad;
-
 use const STR_PAD_LEFT;
-
 use function strlen;
-
-class ConstExprStringNode implements ConstExprNode
+class Const_Expr_String_Node implements Const_Expr_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public const SINGLE_QUOTED = 1;
     public const DOUBLE_QUOTED = 2;
-
     public string $value;
-
     /** @var self::SINGLE_QUOTED|self::DOUBLE_QUOTED */
-    public $quoteType;
-
+    public $quote_type;
     /**
      * @param self::SINGLE_QUOTED|self::DOUBLE_QUOTED $quoteType
      */
-    public function __construct(string $value, int $quoteType)
+    public function __construct(string $value, int $quote_type)
     {
         $this->value = $value;
-        $this->quoteType = $quoteType;
+        $this->quote_type = $quote_type;
     }
-
     public function __toString(): string
     {
-        if ($this->quoteType === self::SINGLE_QUOTED) {
+        if ($this->quote_type === self::SINGLE_QUOTED) {
             // from https://github.com/nikic/PHP-Parser/blob/0ffddce52d816f72d0efc4d9b02e276d3309ef01/lib/PhpParser/PrettyPrinter/Standard.php#L1007
             return sprintf("'%s'", addcslashes($this->value, '\'\\'));
         }
-
         // from https://github.com/nikic/PHP-Parser/blob/0ffddce52d816f72d0efc4d9b02e276d3309ef01/lib/PhpParser/PrettyPrinter/Standard.php#L1010-L1040
-        return sprintf('"%s"', $this->escapeDoubleQuotedString());
+        return sprintf('"%s"', $this->escape_double_quoted_string());
     }
-
-    private function escapeDoubleQuotedString(): string
+    private function escape_double_quoted_string(): string
     {
         $quote = '"';
-        $escaped = addcslashes($this->value, "\n\r\t\f\v$" . $quote . '\\');
-
+        $escaped = addcslashes($this->value, "\n\r\t\f\v\$" . $quote . '\\');
         // Escape control characters and non-UTF-8 characters.
         // Regex based on https://stackoverflow.com/a/11709412/385378.
         $regex = '/(
@@ -76,11 +62,9 @@ class ConstExprStringNode implements ConstExprNode
         return preg_replace_callback($regex, static function ($matches): string {
             assert(strlen($matches[0]) === 1);
             $hex = dechex(ord($matches[0]));
-
-            return '\\x' . str_pad($hex, 2, '0', STR_PAD_LEFT);
+            return '\x' . str_pad($hex, 2, '0', STR_PAD_LEFT);
         }, $escaped);
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -89,10 +73,9 @@ class ConstExprStringNode implements ConstExprNode
         $instance = new self($properties['value'], $properties['quoteType']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

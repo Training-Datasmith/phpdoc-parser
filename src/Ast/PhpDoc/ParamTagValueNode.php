@@ -1,45 +1,34 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Type_Node;
 use function trim;
-
-class ParamTagValueNode implements PhpDocTagValueNode
+class Param_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
-    public TypeNode $type;
-
-    public bool $isReference;
-
-    public bool $isVariadic;
-
-    public string $parameterName;
-
+    use Node_Attributes;
+    public Type_Node $type;
+    public bool $is_reference;
+    public bool $is_variadic;
+    public string $parameter_name;
     /** @var string (may be empty) */
     public string $description;
-
-    public function __construct(TypeNode $type, bool $isVariadic, string $parameterName, string $description, bool $isReference)
+    public function __construct(Type_Node $type, bool $is_variadic, string $parameter_name, string $description, bool $is_reference)
     {
         $this->type = $type;
-        $this->isReference = $isReference;
-        $this->isVariadic = $isVariadic;
-        $this->parameterName = $parameterName;
+        $this->is_reference = $is_reference;
+        $this->is_variadic = $is_variadic;
+        $this->parameter_name = $parameter_name;
         $this->description = $description;
     }
-
     public function __toString(): string
     {
-        $reference = $this->isReference ? '&' : '';
-        $variadic = $this->isVariadic ? '...' : '';
-        return trim("{$this->type} {$reference}{$variadic}{$this->parameterName} {$this->description}");
+        $reference = $this->is_reference ? '&' : '';
+        $variadic = $this->is_variadic ? '...' : '';
+        return trim("{$this->type} {$reference}{$variadic}{$this->parameter_name} {$this->description}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -48,10 +37,9 @@ class ParamTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['type'], $properties['isVariadic'], $properties['parameterName'], $properties['description'], $properties['isReference']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

@@ -1,48 +1,30 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Type;
 
-namespace PHPStan\PhpDocParser\Ast\Type;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function sprintf;
-
-class ConditionalTypeNode implements TypeNode
+class Conditional_Type_Node implements Type_Node
 {
-    use NodeAttributes;
-
-    public TypeNode $subjectType;
-
-    public TypeNode $targetType;
-
-    public TypeNode $if;
-
-    public TypeNode $else;
-
+    use Node_Attributes;
+    public Type_Node $subject_type;
+    public Type_Node $target_type;
+    public Type_Node $if;
+    public Type_Node $else;
     public bool $negated;
-
-    public function __construct(TypeNode $subjectType, TypeNode $targetType, TypeNode $if, TypeNode $else, bool $negated)
+    public function __construct(Type_Node $subject_type, Type_Node $target_type, Type_Node $if, Type_Node $else, bool $negated)
     {
-        $this->subjectType = $subjectType;
-        $this->targetType = $targetType;
+        $this->subject_type = $subject_type;
+        $this->target_type = $target_type;
         $this->if = $if;
         $this->else = $else;
         $this->negated = $negated;
     }
-
     public function __toString(): string
     {
-        return sprintf(
-            '(%s %s %s ? %s : %s)',
-            $this->subjectType,
-            $this->negated ? 'is not' : 'is',
-            $this->targetType,
-            $this->if,
-            $this->else,
-        );
+        return sprintf('(%s %s %s ? %s : %s)', $this->subject_type, $this->negated ? 'is not' : 'is', $this->target_type, $this->if, $this->else);
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -51,10 +33,9 @@ class ConditionalTypeNode implements TypeNode
         $instance = new self($properties['subjectType'], $properties['targetType'], $properties['if'], $properties['else'], $properties['negated']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

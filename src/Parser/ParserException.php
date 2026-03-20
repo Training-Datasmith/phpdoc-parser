@@ -1,98 +1,62 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Parser;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Parser;
 
 use function assert;
-
 use Exception;
-
 use function json_encode;
-
 use const JSON_INVALID_UTF8_SUBSTITUTE;
 use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
-
-use PHPStan\PhpDocParser\Lexer\Lexer;
-
+use Php_Stan\Php_Doc_Parser\Lexer\Lexer;
 use function sprintf;
-
-class ParserException extends Exception
+class Parser_Exception extends Exception
 {
-    private string $currentTokenValue;
-
-    private int $currentTokenType;
-
-    private int $currentOffset;
-
-    private int $expectedTokenType;
-
-    private ?string $expectedTokenValue;
-
-    private ?int $currentTokenLine;
-
-    public function __construct(
-        string $currentTokenValue,
-        int $currentTokenType,
-        int $currentOffset,
-        int $expectedTokenType,
-        ?string $expectedTokenValue,
-        ?int $currentTokenLine
-    ) {
-        $this->currentTokenValue = $currentTokenValue;
-        $this->currentTokenType = $currentTokenType;
-        $this->currentOffset = $currentOffset;
-        $this->expectedTokenType = $expectedTokenType;
-        $this->expectedTokenValue = $expectedTokenValue;
-        $this->currentTokenLine = $currentTokenLine;
-
-        parent::__construct(sprintf(
-            'Unexpected token %s, expected %s%s at offset %d%s',
-            $this->formatValue($currentTokenValue),
-            Lexer::TOKEN_LABELS[$expectedTokenType],
-            $expectedTokenValue !== null ? sprintf(' (%s)', $this->formatValue($expectedTokenValue)) : '',
-            $currentOffset,
-            $currentTokenLine === null ? '' : sprintf(' on line %d', $currentTokenLine),
-        ));
-    }
-
-    public function getCurrentTokenValue(): string
+    private string $current_token_value;
+    private int $current_token_type;
+    private int $current_offset;
+    private int $expected_token_type;
+    private ?string $expected_token_value;
+    private ?int $current_token_line;
+    public function __construct(string $current_token_value, int $current_token_type, int $current_offset, int $expected_token_type, ?string $expected_token_value, ?int $current_token_line)
     {
-        return $this->currentTokenValue;
+        $this->current_token_value = $current_token_value;
+        $this->current_token_type = $current_token_type;
+        $this->current_offset = $current_offset;
+        $this->expected_token_type = $expected_token_type;
+        $this->expected_token_value = $expected_token_value;
+        $this->current_token_line = $current_token_line;
+        parent::__construct(sprintf('Unexpected token %s, expected %s%s at offset %d%s', $this->format_value($current_token_value), Lexer::TOKEN_LABELS[$expected_token_type], $expected_token_value !== null ? sprintf(' (%s)', $this->format_value($expected_token_value)) : '', $current_offset, $current_token_line === null ? '' : sprintf(' on line %d', $current_token_line)));
     }
-
-    public function getCurrentTokenType(): int
+    public function get_current_token_value(): string
     {
-        return $this->currentTokenType;
+        return $this->current_token_value;
     }
-
-    public function getCurrentOffset(): int
+    public function get_current_token_type(): int
     {
-        return $this->currentOffset;
+        return $this->current_token_type;
     }
-
-    public function getExpectedTokenType(): int
+    public function get_current_offset(): int
     {
-        return $this->expectedTokenType;
+        return $this->current_offset;
     }
-
-    public function getExpectedTokenValue(): ?string
+    public function get_expected_token_type(): int
     {
-        return $this->expectedTokenValue;
+        return $this->expected_token_type;
     }
-
-    public function getCurrentTokenLine(): ?int
+    public function get_expected_token_value(): ?string
     {
-        return $this->currentTokenLine;
+        return $this->expected_token_value;
     }
-
-    private function formatValue(string $value): string
+    public function get_current_token_line(): ?int
+    {
+        return $this->current_token_line;
+    }
+    private function format_value(string $value): string
     {
         $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
         assert($json !== false);
-
         return $json;
     }
-
 }

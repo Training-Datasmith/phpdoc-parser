@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Printer;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Printer;
 
 use function array_reverse;
 use function count;
-
 use Exception;
-
 /**
  * Inspired by https://github.com/nikic/PHP-Parser/tree/36a6dcd04e7b0285e8f0868f44bd4927802f7df1
  *
@@ -26,18 +23,16 @@ use Exception;
 class Differ
 {
     /** @var callable(T, T): bool */
-    private $isEqual;
-
+    private $is_equal;
     /**
      * Create differ over the given equality relation.
      *
      * @param callable(T, T): bool $isEqual Equality relation
      */
-    public function __construct(callable $isEqual)
+    public function __construct(callable $is_equal)
     {
-        $this->isEqual = $isEqual;
+        $this->is_equal = $is_equal;
     }
-
     /**
      * Calculate diff (edit script) from $old to $new.
      *
@@ -48,10 +43,9 @@ class Differ
      */
     public function diff(array $old, array $new): array
     {
-        [$trace, $x, $y] = $this->calculateTrace($old, $new);
-        return $this->extractDiff($trace, $x, $y, $old, $new);
+        [$trace, $x, $y] = $this->calculate_trace($old, $new);
+        return $this->extract_diff($trace, $x, $y, $old, $new);
     }
-
     /**
      * Calculate diff, including "replace" operations.
      *
@@ -63,17 +57,16 @@ class Differ
      *
      * @return DiffElem[] Diff (edit script), including replace operations
      */
-    public function diffWithReplacements(array $old, array $new): array
+    public function diff_with_replacements(array $old, array $new): array
     {
-        return $this->coalesceReplacements($this->diff($old, $new));
+        return $this->coalesce_replacements($this->diff($old, $new));
     }
-
     /**
      * @param T[] $old
      * @param T[] $new
      * @return array{array<int, array<int, int>>, int, int}
      */
-    private function calculateTrace(array $old, array $new): array
+    private function calculate_trace(array $old, array $new): array
     {
         $n = count($old);
         $m = count($new);
@@ -83,18 +76,16 @@ class Differ
         for ($d = 0; $d <= $max; $d++) {
             $trace[] = $v;
             for ($k = -$d; $k <= $d; $k += 2) {
-                if ($k === -$d || ($k !== $d && $v[$k - 1] < $v[$k + 1])) {
+                if ($k === -$d || $k !== $d && $v[$k - 1] < $v[$k + 1]) {
                     $x = $v[$k + 1];
                 } else {
                     $x = $v[$k - 1] + 1;
                 }
-
                 $y = $x - $k;
-                while ($x < $n && $y < $m && ($this->isEqual)($old[$x], $new[$y])) {
+                while ($x < $n && $y < $m && ($this->is_equal)($old[$x], $new[$y])) {
                     $x++;
                     $y++;
                 }
-
                 $v[$k] = $x;
                 if ($x >= $n && $y >= $m) {
                     return [$trace, $x, $y];
@@ -103,96 +94,80 @@ class Differ
         }
         throw new Exception('Should not happen');
     }
-
     /**
      * @param array<int, array<int, int>> $trace
      * @param T[] $old
      * @param T[] $new
      * @return DiffElem[]
      */
-    private function extractDiff(array $trace, int $x, int $y, array $old, array $new): array
+    private function extract_diff(array $trace, int $x, int $y, array $old, array $new): array
     {
         $result = [];
         for ($d = count($trace) - 1; $d >= 0; $d--) {
             $v = $trace[$d];
             $k = $x - $y;
-
-            if ($k === -$d || ($k !== $d && $v[$k - 1] < $v[$k + 1])) {
-                $prevK = $k + 1;
+            if ($k === -$d || $k !== $d && $v[$k - 1] < $v[$k + 1]) {
+                $prev_k = $k + 1;
             } else {
-                $prevK = $k - 1;
+                $prev_k = $k - 1;
             }
-
-            $prevX = $v[$prevK];
-            $prevY = $prevX - $prevK;
-
-            while ($x > $prevX && $y > $prevY) {
-                $result[] = new DiffElem(DiffElem::TYPE_KEEP, $old[$x - 1], $new[$y - 1]);
+            $prev_x = $v[$prev_k];
+            $prev_y = $prev_x - $prev_k;
+            while ($x > $prev_x && $y > $prev_y) {
+                $result[] = new Diff_Elem(Diff_Elem::TYPE_KEEP, $old[$x - 1], $new[$y - 1]);
                 $x--;
                 $y--;
             }
-
             if ($d === 0) {
                 break;
             }
-
-            while ($x > $prevX) {
-                $result[] = new DiffElem(DiffElem::TYPE_REMOVE, $old[$x - 1], null);
+            while ($x > $prev_x) {
+                $result[] = new Diff_Elem(Diff_Elem::TYPE_REMOVE, $old[$x - 1], null);
                 $x--;
             }
-
-            while ($y > $prevY) {
-                $result[] = new DiffElem(DiffElem::TYPE_ADD, null, $new[$y - 1]);
+            while ($y > $prev_y) {
+                $result[] = new Diff_Elem(Diff_Elem::TYPE_ADD, null, $new[$y - 1]);
                 $y--;
             }
         }
         return array_reverse($result);
     }
-
     /**
      * Coalesce equal-length sequences of remove+add into a replace operation.
      *
      * @param DiffElem[] $diff
      * @return DiffElem[]
      */
-    private function coalesceReplacements(array $diff): array
+    private function coalesce_replacements(array $diff): array
     {
-        $newDiff = [];
+        $new_diff = [];
         $c = count($diff);
         for ($i = 0; $i < $c; $i++) {
-            $diffType = $diff[$i]->type;
-            if ($diffType !== DiffElem::TYPE_REMOVE) {
-                $newDiff[] = $diff[$i];
+            $diff_type = $diff[$i]->type;
+            if ($diff_type !== Diff_Elem::TYPE_REMOVE) {
+                $new_diff[] = $diff[$i];
                 continue;
             }
-
             $j = $i;
-            while ($j < $c && $diff[$j]->type === DiffElem::TYPE_REMOVE) {
+            while ($j < $c && $diff[$j]->type === Diff_Elem::TYPE_REMOVE) {
                 $j++;
             }
-
             $k = $j;
-            while ($k < $c && $diff[$k]->type === DiffElem::TYPE_ADD) {
+            while ($k < $c && $diff[$k]->type === Diff_Elem::TYPE_ADD) {
                 $k++;
             }
-
             if ($j - $i === $k - $j) {
                 $len = $j - $i;
                 for ($n = 0; $n < $len; $n++) {
-                    $newDiff[] = new DiffElem(
-                        DiffElem::TYPE_REPLACE,
-                        $diff[$i + $n]->old,
-                        $diff[$j + $n]->new,
-                    );
+                    $new_diff[] = new Diff_Elem(Diff_Elem::TYPE_REPLACE, $diff[$i + $n]->old, $diff[$j + $n]->new);
                 }
             } else {
                 for (; $i < $k; $i++) {
-                    $newDiff[] = $diff[$i];
+                    $new_diff[] = $diff[$i];
                 }
             }
             $i = $k - 1;
         }
-        return $newDiff;
+        return $new_diff;
     }
-
 }

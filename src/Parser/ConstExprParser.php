@@ -1,285 +1,166 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Parser;
 
-namespace PHPStan\PhpDocParser\Parser;
-
-use PHPStan\PhpDocParser\Ast;
-use PHPStan\PhpDocParser\Lexer\Lexer;
-use PHPStan\PhpDocParser\ParserConfig;
-
+use Php_Stan\Php_Doc_Parser\Ast;
+use Php_Stan\Php_Doc_Parser\Lexer\Lexer;
+use Php_Stan\Php_Doc_Parser\Parser_Config;
 use function str_replace;
 use function strtolower;
-
-class ConstExprParser
+class Const_Expr_Parser
 {
-    private ParserConfig $config;
-
-    private bool $parseDoctrineStrings;
-
-    public function __construct(
-        ParserConfig $config
-    ) {
+    private Parser_Config $config;
+    private bool $parse_doctrine_strings;
+    public function __construct(Parser_Config $config)
+    {
         $this->config = $config;
-        $this->parseDoctrineStrings = false;
+        $this->parse_doctrine_strings = false;
     }
-
     /**
      * @internal
      */
-    public function toDoctrine(): self
+    public function to_doctrine(): self
     {
         $self = new self($this->config);
-        $self->parseDoctrineStrings = true;
+        $self->parse_doctrine_strings = true;
         return $self;
     }
-
-    public function parse(TokenIterator $tokens): Ast\ConstExpr\ConstExprNode
+    public function parse(Token_Iterator $tokens): Ast\Const_Expr\Const_Expr_Node
     {
-        $startLine = $tokens->currentTokenLine();
-        $startIndex = $tokens->currentTokenIndex();
-        if ($tokens->isCurrentTokenType(Lexer::TOKEN_FLOAT)) {
-            $value = $tokens->currentTokenValue();
+        $start_line = $tokens->current_token_line();
+        $start_index = $tokens->current_token_index();
+        if ($tokens->is_current_token_type(Lexer::TOKEN_FLOAT)) {
+            $value = $tokens->current_token_value();
             $tokens->next();
-
-            return $this->enrichWithAttributes(
-                $tokens,
-                new Ast\ConstExpr\ConstExprFloatNode(str_replace('_', '', $value)),
-                $startLine,
-                $startIndex,
-            );
+            return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_Float_Node(str_replace('_', '', $value)), $start_line, $start_index);
         }
-
-        if ($tokens->isCurrentTokenType(Lexer::TOKEN_INTEGER)) {
-            $value = $tokens->currentTokenValue();
+        if ($tokens->is_current_token_type(Lexer::TOKEN_INTEGER)) {
+            $value = $tokens->current_token_value();
             $tokens->next();
-
-            return $this->enrichWithAttributes(
-                $tokens,
-                new Ast\ConstExpr\ConstExprIntegerNode(str_replace('_', '', $value)),
-                $startLine,
-                $startIndex,
-            );
+            return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_Integer_Node(str_replace('_', '', $value)), $start_line, $start_index);
         }
-
-        if ($this->parseDoctrineStrings && $tokens->isCurrentTokenType(Lexer::TOKEN_DOCTRINE_ANNOTATION_STRING)) {
-            $value = $tokens->currentTokenValue();
+        if ($this->parse_doctrine_strings && $tokens->is_current_token_type(Lexer::TOKEN_DOCTRINE_ANNOTATION_STRING)) {
+            $value = $tokens->current_token_value();
             $tokens->next();
-
-            return $this->enrichWithAttributes(
-                $tokens,
-                new Ast\ConstExpr\DoctrineConstExprStringNode(Ast\ConstExpr\DoctrineConstExprStringNode::unescape($value)),
-                $startLine,
-                $startIndex,
-            );
+            return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Doctrine_Const_Expr_String_Node(Ast\Const_Expr\Doctrine_Const_Expr_String_Node::unescape($value)), $start_line, $start_index);
         }
-        if ($tokens->isCurrentTokenType(Lexer::TOKEN_SINGLE_QUOTED_STRING, Lexer::TOKEN_DOUBLE_QUOTED_STRING)) {
-            if ($this->parseDoctrineStrings) {
-                if ($tokens->isCurrentTokenType(Lexer::TOKEN_SINGLE_QUOTED_STRING)) {
-                    throw new ParserException(
-                        $tokens->currentTokenValue(),
-                        $tokens->currentTokenType(),
-                        $tokens->currentTokenOffset(),
-                        Lexer::TOKEN_DOUBLE_QUOTED_STRING,
-                        null,
-                        $tokens->currentTokenLine(),
-                    );
+        if ($tokens->is_current_token_type(Lexer::TOKEN_SINGLE_QUOTED_STRING, Lexer::TOKEN_DOUBLE_QUOTED_STRING)) {
+            if ($this->parse_doctrine_strings) {
+                if ($tokens->is_current_token_type(Lexer::TOKEN_SINGLE_QUOTED_STRING)) {
+                    throw new Parser_Exception($tokens->current_token_value(), $tokens->current_token_type(), $tokens->current_token_offset(), Lexer::TOKEN_DOUBLE_QUOTED_STRING, null, $tokens->current_token_line());
                 }
-
-                $value = $tokens->currentTokenValue();
+                $value = $tokens->current_token_value();
                 $tokens->next();
-
-                return $this->enrichWithAttributes(
-                    $tokens,
-                    $this->parseDoctrineString($value, $tokens),
-                    $startLine,
-                    $startIndex,
-                );
+                return $this->enrich_with_attributes($tokens, $this->parse_doctrine_string($value, $tokens), $start_line, $start_index);
             }
-            $value = StringUnescaper::unescapeString($tokens->currentTokenValue());
-            $type = $tokens->currentTokenType();
+            $value = String_Unescaper::unescape_string($tokens->current_token_value());
+            $type = $tokens->current_token_type();
             $tokens->next();
-            return $this->enrichWithAttributes(
-                $tokens,
-                new Ast\ConstExpr\ConstExprStringNode(
-                    $value,
-                    $type === Lexer::TOKEN_SINGLE_QUOTED_STRING
-                        ? Ast\ConstExpr\ConstExprStringNode::SINGLE_QUOTED
-                        : Ast\ConstExpr\ConstExprStringNode::DOUBLE_QUOTED,
-                ),
-                $startLine,
-                $startIndex,
-            );
+            return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_String_Node($value, $type === Lexer::TOKEN_SINGLE_QUOTED_STRING ? Ast\Const_Expr\Const_Expr_String_Node::SINGLE_QUOTED : Ast\Const_Expr\Const_Expr_String_Node::DOUBLE_QUOTED), $start_line, $start_index);
         }
-        if ($tokens->isCurrentTokenType(Lexer::TOKEN_IDENTIFIER)) {
-            $identifier = $tokens->currentTokenValue();
+        if ($tokens->is_current_token_type(Lexer::TOKEN_IDENTIFIER)) {
+            $identifier = $tokens->current_token_value();
             $tokens->next();
             switch (strtolower($identifier)) {
                 case 'true':
-                    return $this->enrichWithAttributes(
-                        $tokens,
-                        new Ast\ConstExpr\ConstExprTrueNode(),
-                        $startLine,
-                        $startIndex,
-                    );
+                    return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_True_Node(), $start_line, $start_index);
                 case 'false':
-                    return $this->enrichWithAttributes(
-                        $tokens,
-                        new Ast\ConstExpr\ConstExprFalseNode(),
-                        $startLine,
-                        $startIndex,
-                    );
+                    return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_False_Node(), $start_line, $start_index);
                 case 'null':
-                    return $this->enrichWithAttributes(
-                        $tokens,
-                        new Ast\ConstExpr\ConstExprNullNode(),
-                        $startLine,
-                        $startIndex,
-                    );
+                    return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_Null_Node(), $start_line, $start_index);
                 case 'array':
-                    $tokens->consumeTokenType(Lexer::TOKEN_OPEN_PARENTHESES);
-                    return $this->parseArray($tokens, Lexer::TOKEN_CLOSE_PARENTHESES, $startIndex);
+                    $tokens->consume_token_type(Lexer::TOKEN_OPEN_PARENTHESES);
+                    return $this->parse_array($tokens, Lexer::TOKEN_CLOSE_PARENTHESES, $start_index);
             }
-            if ($tokens->tryConsumeTokenType(Lexer::TOKEN_DOUBLE_COLON)) {
-                $classConstantName = '';
-                $lastType = null;
+            if ($tokens->try_consume_token_type(Lexer::TOKEN_DOUBLE_COLON)) {
+                $class_constant_name = '';
+                $last_type = null;
                 while (true) {
-                    if ($lastType !== Lexer::TOKEN_IDENTIFIER && $tokens->currentTokenType() === Lexer::TOKEN_IDENTIFIER) {
-                        $classConstantName .= $tokens->currentTokenValue();
-                        $tokens->consumeTokenType(Lexer::TOKEN_IDENTIFIER);
-                        $lastType = Lexer::TOKEN_IDENTIFIER;
-
+                    if ($last_type !== Lexer::TOKEN_IDENTIFIER && $tokens->current_token_type() === Lexer::TOKEN_IDENTIFIER) {
+                        $class_constant_name .= $tokens->current_token_value();
+                        $tokens->consume_token_type(Lexer::TOKEN_IDENTIFIER);
+                        $last_type = Lexer::TOKEN_IDENTIFIER;
                         continue;
                     }
-
-                    if ($lastType !== Lexer::TOKEN_WILDCARD && $tokens->tryConsumeTokenType(Lexer::TOKEN_WILDCARD)) {
-                        $classConstantName .= '*';
-                        $lastType = Lexer::TOKEN_WILDCARD;
-
-                        if ($tokens->getSkippedHorizontalWhiteSpaceIfAny() !== '') {
+                    if ($last_type !== Lexer::TOKEN_WILDCARD && $tokens->try_consume_token_type(Lexer::TOKEN_WILDCARD)) {
+                        $class_constant_name .= '*';
+                        $last_type = Lexer::TOKEN_WILDCARD;
+                        if ($tokens->get_skipped_horizontal_white_space_if_any() !== '') {
                             break;
                         }
-
                         continue;
                     }
-
-                    if ($lastType === null) {
+                    if ($last_type === null) {
                         // trigger parse error if nothing valid was consumed
-                        $tokens->consumeTokenType(Lexer::TOKEN_WILDCARD);
+                        $tokens->consume_token_type(Lexer::TOKEN_WILDCARD);
                     }
-
                     break;
                 }
-
-                return $this->enrichWithAttributes(
-                    $tokens,
-                    new Ast\ConstExpr\ConstFetchNode($identifier, $classConstantName),
-                    $startLine,
-                    $startIndex,
-                );
-
+                return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Fetch_Node($identifier, $class_constant_name), $start_line, $start_index);
             }
-            return $this->enrichWithAttributes(
-                $tokens,
-                new Ast\ConstExpr\ConstFetchNode('', $identifier),
-                $startLine,
-                $startIndex,
-            );
+            return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Fetch_Node('', $identifier), $start_line, $start_index);
         }
-
-        if ($tokens->tryConsumeTokenType(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
-            return $this->parseArray($tokens, Lexer::TOKEN_CLOSE_SQUARE_BRACKET, $startIndex);
+        if ($tokens->try_consume_token_type(Lexer::TOKEN_OPEN_SQUARE_BRACKET)) {
+            return $this->parse_array($tokens, Lexer::TOKEN_CLOSE_SQUARE_BRACKET, $start_index);
         }
-
-        throw new ParserException(
-            $tokens->currentTokenValue(),
-            $tokens->currentTokenType(),
-            $tokens->currentTokenOffset(),
-            Lexer::TOKEN_IDENTIFIER,
-            null,
-            $tokens->currentTokenLine(),
-        );
+        throw new Parser_Exception($tokens->current_token_value(), $tokens->current_token_type(), $tokens->current_token_offset(), Lexer::TOKEN_IDENTIFIER, null, $tokens->current_token_line());
     }
-
-    private function parseArray(TokenIterator $tokens, int $endToken, int $startIndex): Ast\ConstExpr\ConstExprArrayNode
+    private function parse_array(Token_Iterator $tokens, int $end_token, int $start_index): Ast\Const_Expr\Const_Expr_Array_Node
     {
         $items = [];
-
-        $startLine = $tokens->currentTokenLine();
-
-        if (!$tokens->tryConsumeTokenType($endToken)) {
+        $start_line = $tokens->current_token_line();
+        if (!$tokens->try_consume_token_type($end_token)) {
             do {
-                $items[] = $this->parseArrayItem($tokens);
-            } while ($tokens->tryConsumeTokenType(Lexer::TOKEN_COMMA) && !$tokens->isCurrentTokenType($endToken));
-            $tokens->consumeTokenType($endToken);
+                $items[] = $this->parse_array_item($tokens);
+            } while ($tokens->try_consume_token_type(Lexer::TOKEN_COMMA) && !$tokens->is_current_token_type($end_token));
+            $tokens->consume_token_type($end_token);
         }
-
-        return $this->enrichWithAttributes(
-            $tokens,
-            new Ast\ConstExpr\ConstExprArrayNode($items),
-            $startLine,
-            $startIndex,
-        );
+        return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_Array_Node($items), $start_line, $start_index);
     }
-
     /**
      * This method is supposed to be called with TokenIterator after reading TOKEN_DOUBLE_QUOTED_STRING and shifting
      * to the next token.
      */
-    public function parseDoctrineString(string $text, TokenIterator $tokens): Ast\ConstExpr\DoctrineConstExprStringNode
+    public function parse_doctrine_string(string $text, Token_Iterator $tokens): Ast\Const_Expr\Doctrine_Const_Expr_String_Node
     {
         // Because of how Lexer works, a valid Doctrine string
         // can consist of a sequence of TOKEN_DOUBLE_QUOTED_STRING and TOKEN_DOCTRINE_ANNOTATION_STRING
-        while ($tokens->isCurrentTokenType(Lexer::TOKEN_DOUBLE_QUOTED_STRING, Lexer::TOKEN_DOCTRINE_ANNOTATION_STRING)) {
-            $text .= $tokens->currentTokenValue();
+        while ($tokens->is_current_token_type(Lexer::TOKEN_DOUBLE_QUOTED_STRING, Lexer::TOKEN_DOCTRINE_ANNOTATION_STRING)) {
+            $text .= $tokens->current_token_value();
             $tokens->next();
         }
-
-        return new Ast\ConstExpr\DoctrineConstExprStringNode(Ast\ConstExpr\DoctrineConstExprStringNode::unescape($text));
+        return new Ast\Const_Expr\Doctrine_Const_Expr_String_Node(Ast\Const_Expr\Doctrine_Const_Expr_String_Node::unescape($text));
     }
-
-    private function parseArrayItem(TokenIterator $tokens): Ast\ConstExpr\ConstExprArrayItemNode
+    private function parse_array_item(Token_Iterator $tokens): Ast\Const_Expr\Const_Expr_Array_Item_Node
     {
-        $startLine = $tokens->currentTokenLine();
-        $startIndex = $tokens->currentTokenIndex();
-
+        $start_line = $tokens->current_token_line();
+        $start_index = $tokens->current_token_index();
         $expr = $this->parse($tokens);
-
-        if ($tokens->tryConsumeTokenType(Lexer::TOKEN_DOUBLE_ARROW)) {
+        if ($tokens->try_consume_token_type(Lexer::TOKEN_DOUBLE_ARROW)) {
             $key = $expr;
             $value = $this->parse($tokens);
-
         } else {
             $key = null;
             $value = $expr;
         }
-
-        return $this->enrichWithAttributes(
-            $tokens,
-            new Ast\ConstExpr\ConstExprArrayItemNode($key, $value),
-            $startLine,
-            $startIndex,
-        );
+        return $this->enrich_with_attributes($tokens, new Ast\Const_Expr\Const_Expr_Array_Item_Node($key, $value), $start_line, $start_index);
     }
-
     /**
      * @template T of Ast\ConstExpr\ConstExprNode
      * @param T $node
      * @return T
      */
-    private function enrichWithAttributes(TokenIterator $tokens, Ast\ConstExpr\ConstExprNode $node, int $startLine, int $startIndex): Ast\ConstExpr\ConstExprNode
+    private function enrich_with_attributes(Token_Iterator $tokens, Ast\Const_Expr\Const_Expr_Node $node, int $start_line, int $start_index): Ast\Const_Expr\Const_Expr_Node
     {
-        if ($this->config->useLinesAttributes) {
-            $node->setAttribute(Ast\Attribute::START_LINE, $startLine);
-            $node->setAttribute(Ast\Attribute::END_LINE, $tokens->currentTokenLine());
+        if ($this->config->use_lines_attributes) {
+            $node->set_attribute(Ast\Attribute::START_LINE, $start_line);
+            $node->set_attribute(Ast\Attribute::END_LINE, $tokens->current_token_line());
         }
-
-        if ($this->config->useIndexAttributes) {
-            $node->setAttribute(Ast\Attribute::START_INDEX, $startIndex);
-            $node->setAttribute(Ast\Attribute::END_INDEX, $tokens->endIndexOfLastRelevantToken());
+        if ($this->config->use_index_attributes) {
+            $node->set_attribute(Ast\Attribute::START_INDEX, $start_index);
+            $node->set_attribute(Ast\Attribute::END_INDEX, $tokens->end_index_of_last_relevant_token());
         }
-
         return $node;
     }
-
 }

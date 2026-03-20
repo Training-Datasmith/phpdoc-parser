@@ -1,33 +1,25 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Type_Node;
 use function trim;
-
-class TypeAliasTagValueNode implements PhpDocTagValueNode
+class Type_Alias_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public string $alias;
-
-    public TypeNode $type;
-
-    public function __construct(string $alias, TypeNode $type)
+    public Type_Node $type;
+    public function __construct(string $alias, Type_Node $type)
     {
         $this->alias = $alias;
         $this->type = $type;
     }
-
     public function __toString(): string
     {
         return trim("{$this->alias} {$this->type}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -36,10 +28,9 @@ class TypeAliasTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['alias'], $properties['type']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

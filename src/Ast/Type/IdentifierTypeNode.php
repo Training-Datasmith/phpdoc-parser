@@ -1,27 +1,21 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Type;
 
-namespace PHPStan\PhpDocParser\Ast\Type;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class IdentifierTypeNode implements TypeNode
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Identifier_Type_Node implements Type_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public string $name;
-
     public function __construct(string $name)
     {
         $this->name = $name;
     }
-
     public function __toString(): string
     {
         return $this->name;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -30,10 +24,9 @@ class IdentifierTypeNode implements TypeNode
         $instance = new self($properties['name']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

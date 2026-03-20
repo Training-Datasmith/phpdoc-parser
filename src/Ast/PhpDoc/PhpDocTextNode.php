@@ -1,27 +1,21 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class PhpDocTextNode implements PhpDocChildNode
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Php_Doc_Text_Node implements Php_Doc_Child_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public string $text;
-
     public function __construct(string $text)
     {
         $this->text = $text;
     }
-
     public function __toString(): string
     {
         return $this->text;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -30,10 +24,9 @@ class PhpDocTextNode implements PhpDocChildNode
         $instance = new self($properties['text']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

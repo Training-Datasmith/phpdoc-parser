@@ -1,28 +1,22 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class GenericTagValueNode implements PhpDocTagValueNode
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Generic_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     /** @var string (may be empty) */
     public string $value;
-
     public function __construct(string $value)
     {
         $this->value = $value;
     }
-
     public function __toString(): string
     {
         return $this->value;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -31,10 +25,9 @@ class GenericTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['value']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

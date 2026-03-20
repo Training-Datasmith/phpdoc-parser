@@ -1,37 +1,27 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Const_Expr;
 
-namespace PHPStan\PhpDocParser\Ast\ConstExpr;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function sprintf;
-
-class ConstExprArrayItemNode implements ConstExprNode
+class Const_Expr_Array_Item_Node implements Const_Expr_Node
 {
-    use NodeAttributes;
-
-    public ?ConstExprNode $key = null;
-
-    public ConstExprNode $value;
-
-    public function __construct(?ConstExprNode $key, ConstExprNode $value)
+    use Node_Attributes;
+    public ?Const_Expr_Node $key = null;
+    public Const_Expr_Node $value;
+    public function __construct(?Const_Expr_Node $key, Const_Expr_Node $value)
     {
         $this->key = $key;
         $this->value = $value;
     }
-
     public function __toString(): string
     {
         if ($this->key !== null) {
             return sprintf('%s => %s', $this->key, $this->value);
-
         }
-
         return (string) $this->value;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -40,10 +30,9 @@ class ConstExprArrayItemNode implements ConstExprNode
         $instance = new self($properties['key'], $properties['value']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

@@ -1,11 +1,9 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\Node;
-
-interface PhpDocChildNode extends Node
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+interface Php_Doc_Child_Node extends Node
 {
 }

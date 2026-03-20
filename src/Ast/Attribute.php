@@ -1,19 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast;
 
 final class Attribute
 {
     public const START_LINE = 'startLine';
     public const END_LINE = 'endLine';
-
     public const START_INDEX = 'startIndex';
     public const END_INDEX = 'endIndex';
-
     public const ORIGINAL_NODE = 'originalNode';
-
     public const COMMENTS = 'comments';
-
 }

@@ -1,39 +1,27 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Identifier_Type_Node;
 use function trim;
-
-class TypeAliasImportTagValueNode implements PhpDocTagValueNode
+class Type_Alias_Import_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
-    public string $importedAlias;
-
-    public IdentifierTypeNode $importedFrom;
-
-    public ?string $importedAs = null;
-
-    public function __construct(string $importedAlias, IdentifierTypeNode $importedFrom, ?string $importedAs)
+    use Node_Attributes;
+    public string $imported_alias;
+    public Identifier_Type_Node $imported_from;
+    public ?string $imported_as = null;
+    public function __construct(string $imported_alias, Identifier_Type_Node $imported_from, ?string $imported_as)
     {
-        $this->importedAlias = $importedAlias;
-        $this->importedFrom = $importedFrom;
-        $this->importedAs = $importedAs;
+        $this->imported_alias = $imported_alias;
+        $this->imported_from = $imported_from;
+        $this->imported_as = $imported_as;
     }
-
     public function __toString(): string
     {
-        return trim(
-            "{$this->importedAlias} from {$this->importedFrom}"
-            . ($this->importedAs !== null ? " as {$this->importedAs}" : ''),
-        );
+        return trim("{$this->imported_alias} from {$this->imported_from}" . ($this->imported_as !== null ? " as {$this->imported_as}" : ''));
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -42,10 +30,9 @@ class TypeAliasImportTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['importedAlias'], $properties['importedFrom'], $properties['importedAs']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

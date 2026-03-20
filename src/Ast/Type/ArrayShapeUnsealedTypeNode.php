@@ -1,36 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Type;
 
-namespace PHPStan\PhpDocParser\Ast\Type;
-
-use PHPStan\PhpDocParser\Ast\Node;
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function sprintf;
-
-class ArrayShapeUnsealedTypeNode implements Node
+class Array_Shape_Unsealed_Type_Node implements Node
 {
-    use NodeAttributes;
-
-    public TypeNode $valueType;
-
-    public ?TypeNode $keyType = null;
-
-    public function __construct(TypeNode $valueType, ?TypeNode $keyType)
+    use Node_Attributes;
+    public Type_Node $value_type;
+    public ?Type_Node $key_type = null;
+    public function __construct(Type_Node $value_type, ?Type_Node $key_type)
     {
-        $this->valueType = $valueType;
-        $this->keyType = $keyType;
+        $this->value_type = $value_type;
+        $this->key_type = $key_type;
     }
-
     public function __toString(): string
     {
-        if ($this->keyType !== null) {
-            return sprintf('<%s, %s>', $this->keyType, $this->valueType);
+        if ($this->key_type !== null) {
+            return sprintf('<%s, %s>', $this->key_type, $this->value_type);
         }
-        return sprintf('<%s>', $this->valueType);
+        return sprintf('<%s>', $this->value_type);
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -39,10 +31,9 @@ class ArrayShapeUnsealedTypeNode implements Node
         $instance = new self($properties['valueType'], $properties['keyType']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

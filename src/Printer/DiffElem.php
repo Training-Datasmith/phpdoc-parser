@@ -1,8 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Printer;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Printer;
 
 /**
  * Inspired by https://github.com/nikic/PHP-Parser/tree/36a6dcd04e7b0285e8f0868f44bd4927802f7df1
@@ -14,22 +13,18 @@ namespace PHPStan\PhpDocParser\Printer;
  *
  * @internal
  */
-class DiffElem
+class Diff_Elem
 {
     public const TYPE_KEEP = 0;
     public const TYPE_REMOVE = 1;
     public const TYPE_ADD = 2;
     public const TYPE_REPLACE = 3;
-
     /** @var self::TYPE_* */
     public $type;
-
     /** @var mixed Is null for add operations */
     public $old;
-
     /** @var mixed Is null for remove operations */
     public $new;
-
     /**
      * @param self::TYPE_* $type
      * @param mixed $old Is null for add operations
@@ -41,5 +36,4 @@ class DiffElem
         $this->old = $old;
         $this->new = $new;
     }
-
 }

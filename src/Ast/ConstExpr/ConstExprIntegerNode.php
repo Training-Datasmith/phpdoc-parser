@@ -1,27 +1,21 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Const_Expr;
 
-namespace PHPStan\PhpDocParser\Ast\ConstExpr;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class ConstExprIntegerNode implements ConstExprNode
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Const_Expr_Integer_Node implements Const_Expr_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public string $value;
-
     public function __construct(string $value)
     {
         $this->value = $value;
     }
-
     public function __toString(): string
     {
         return $this->value;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -30,10 +24,9 @@ class ConstExprIntegerNode implements ConstExprNode
         $instance = new self($properties['value']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

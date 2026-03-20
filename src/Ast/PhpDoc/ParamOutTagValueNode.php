@@ -1,37 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Type_Node;
 use function trim;
-
-class ParamOutTagValueNode implements PhpDocTagValueNode
+class Param_Out_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
-    public TypeNode $type;
-
-    public string $parameterName;
-
+    use Node_Attributes;
+    public Type_Node $type;
+    public string $parameter_name;
     /** @var string (may be empty) */
     public string $description;
-
-    public function __construct(TypeNode $type, string $parameterName, string $description)
+    public function __construct(Type_Node $type, string $parameter_name, string $description)
     {
         $this->type = $type;
-        $this->parameterName = $parameterName;
+        $this->parameter_name = $parameter_name;
         $this->description = $description;
     }
-
     public function __toString(): string
     {
-        return trim("{$this->type} {$this->parameterName} {$this->description}");
+        return trim("{$this->type} {$this->parameter_name} {$this->description}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -40,10 +31,9 @@ class ParamOutTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['type'], $properties['parameterName'], $properties['description']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

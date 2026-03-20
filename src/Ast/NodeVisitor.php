@@ -1,8 +1,7 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast;
 
 /**
  * Inspired by https://github.com/nikic/PHP-Parser/tree/36a6dcd04e7b0285e8f0868f44bd4927802f7df1
@@ -10,7 +9,7 @@ namespace PHPStan\PhpDocParser\Ast;
  * Copyright (c) 2011, Nikita Popov
  * All rights reserved.
  */
-interface NodeVisitor
+interface Node_Visitor
 {
     /**
      * Called once before traversal.
@@ -23,8 +22,7 @@ interface NodeVisitor
      *
      * @return Node[]|null Array of nodes
      */
-    public function beforeTraverse(array $nodes): ?array;
-
+    public function before_traverse(array $nodes): ?array;
     /**
      * Called when entering a node.
      *
@@ -49,8 +47,7 @@ interface NodeVisitor
      *
      * @return Node|Node[]|NodeTraverser::*|null Replacement node (or special return value)
      */
-    public function enterNode(Node $node);
-
+    public function enter_node(Node $node);
     /**
      * Called when leaving a node.
      *
@@ -70,8 +67,7 @@ interface NodeVisitor
      *
      * @return Node|Node[]|NodeTraverser::REMOVE_NODE|NodeTraverser::STOP_TRAVERSAL|null Replacement node (or special return value)
      */
-    public function leaveNode(Node $node);
-
+    public function leave_node(Node $node);
     /**
      * Called once after traversal.
      *
@@ -83,6 +79,5 @@ interface NodeVisitor
      *
      * @return Node[]|null Array of nodes
      */
-    public function afterTraverse(array $nodes): ?array;
-
+    public function after_traverse(array $nodes): ?array;
 }

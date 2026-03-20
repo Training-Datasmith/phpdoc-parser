@@ -1,45 +1,34 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\TypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Type_Node;
 use function trim;
-
-class AssertTagValueNode implements PhpDocTagValueNode
+class Assert_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
-    public TypeNode $type;
-
+    use Node_Attributes;
+    public Type_Node $type;
     public string $parameter;
-
-    public bool $isNegated;
-
-    public bool $isEquality;
-
+    public bool $is_negated;
+    public bool $is_equality;
     /** @var string (may be empty) */
     public string $description;
-
-    public function __construct(TypeNode $type, string $parameter, bool $isNegated, string $description, bool $isEquality)
+    public function __construct(Type_Node $type, string $parameter, bool $is_negated, string $description, bool $is_equality)
     {
         $this->type = $type;
         $this->parameter = $parameter;
-        $this->isNegated = $isNegated;
-        $this->isEquality = $isEquality;
+        $this->is_negated = $is_negated;
+        $this->is_equality = $is_equality;
         $this->description = $description;
     }
-
     public function __toString(): string
     {
-        $isNegated = $this->isNegated ? '!' : '';
-        $isEquality = $this->isEquality ? '=' : '';
-        return trim("{$isNegated}{$isEquality}{$this->type} {$this->parameter} {$this->description}");
+        $is_negated = $this->is_negated ? '!' : '';
+        $is_equality = $this->is_equality ? '=' : '';
+        return trim("{$is_negated}{$is_equality}{$this->type} {$this->parameter} {$this->description}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -48,10 +37,9 @@ class AssertTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['type'], $properties['parameter'], $properties['isNegated'], $properties['description'], $properties['isEquality']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

@@ -1,44 +1,36 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc\Doctrine;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine;
-
-use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprNode;
-use PHPStan\PhpDocParser\Ast\Node;
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
-
+use Php_Stan\Php_Doc_Parser\Ast\Const_Expr\Const_Expr_Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node;
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+use Php_Stan\Php_Doc_Parser\Ast\Type\Identifier_Type_Node;
 /**
  * @phpstan-type ValueType = DoctrineAnnotation|IdentifierTypeNode|DoctrineArray|ConstExprNode
  */
-class DoctrineArgument implements Node
+class Doctrine_Argument implements Node
 {
-    use NodeAttributes;
-
-    public ?IdentifierTypeNode $key = null;
-
+    use Node_Attributes;
+    public ?Identifier_Type_Node $key = null;
     /** @var ValueType */
     public $value;
-
     /**
      * @param ValueType $value
      */
-    public function __construct(?IdentifierTypeNode $key, $value)
+    public function __construct(?Identifier_Type_Node $key, $value)
     {
         $this->key = $key;
         $this->value = $value;
     }
-
     public function __toString(): string
     {
         if ($this->key === null) {
             return (string) $this->value;
         }
-
         return $this->key . '=' . $this->value;
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -47,10 +39,9 @@ class DoctrineArgument implements Node
         $instance = new self($properties['key'], $properties['value']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

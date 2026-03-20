@@ -1,20 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Const_Expr;
 
-namespace PHPStan\PhpDocParser\Ast\ConstExpr;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class ConstExprNullNode implements ConstExprNode
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Const_Expr_Null_Node implements Const_Expr_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public function __toString(): string
     {
         return 'null';
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -23,10 +19,9 @@ class ConstExprNullNode implements ConstExprNode
         $instance = new self();
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

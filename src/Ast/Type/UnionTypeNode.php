@@ -1,21 +1,16 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast\Type;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Type;
 
 use function array_map;
 use function implode;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class UnionTypeNode implements TypeNode
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Union_Type_Node implements Type_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     /** @var TypeNode[] */
     public array $types;
-
     /**
      * @param TypeNode[] $types
      */
@@ -23,18 +18,15 @@ class UnionTypeNode implements TypeNode
     {
         $this->types = $types;
     }
-
     public function __toString(): string
     {
-        return '(' . implode(' | ', array_map(static function (TypeNode $type): string {
-            if ($type instanceof NullableTypeNode) {
+        return '(' . implode(' | ', array_map(static function (Type_Node $type): string {
+            if ($type instanceof Nullable_Type_Node) {
                 return '(' . $type . ')';
             }
-
             return (string) $type;
         }, $this->types)) . ')';
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -43,10 +35,9 @@ class UnionTypeNode implements TypeNode
         $instance = new self($properties['types']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

@@ -1,33 +1,25 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function trim;
-
-class ParamLaterInvokedCallableTagValueNode implements PhpDocTagValueNode
+class Param_Later_Invoked_Callable_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
-    public string $parameterName;
-
+    use Node_Attributes;
+    public string $parameter_name;
     /** @var string (may be empty) */
     public string $description;
-
-    public function __construct(string $parameterName, string $description)
+    public function __construct(string $parameter_name, string $description)
     {
-        $this->parameterName = $parameterName;
+        $this->parameter_name = $parameter_name;
         $this->description = $description;
     }
-
     public function __toString(): string
     {
-        return trim("{$this->parameterName} {$this->description}");
+        return trim("{$this->parameter_name} {$this->description}");
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -36,10 +28,9 @@ class ParamLaterInvokedCallableTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['parameterName'], $properties['description']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

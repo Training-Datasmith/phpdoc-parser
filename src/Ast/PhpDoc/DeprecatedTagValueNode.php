@@ -1,30 +1,23 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Php_Doc;
 
-namespace PHPStan\PhpDocParser\Ast\PhpDoc;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function trim;
-
-class DeprecatedTagValueNode implements PhpDocTagValueNode
+class Deprecated_Tag_Value_Node implements Php_Doc_Tag_Value_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     /** @var string (may be empty) */
     public string $description;
-
     public function __construct(string $description)
     {
         $this->description = $description;
     }
-
     public function __toString(): string
     {
         return trim($this->description);
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -33,10 +26,9 @@ class DeprecatedTagValueNode implements PhpDocTagValueNode
         $instance = new self($properties['description']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

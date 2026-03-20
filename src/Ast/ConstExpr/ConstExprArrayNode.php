@@ -1,20 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
-namespace PHPStan\PhpDocParser\Ast\ConstExpr;
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Const_Expr;
 
 use function implode;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
-class ConstExprArrayNode implements ConstExprNode
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
+class Const_Expr_Array_Node implements Const_Expr_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     /** @var ConstExprArrayItemNode[] */
     public array $items;
-
     /**
      * @param ConstExprArrayItemNode[] $items
      */
@@ -22,12 +17,10 @@ class ConstExprArrayNode implements ConstExprNode
     {
         $this->items = $items;
     }
-
     public function __toString(): string
     {
         return '[' . implode(', ', $this->items) . ']';
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -36,10 +29,9 @@ class ConstExprArrayNode implements ConstExprNode
         $instance = new self($properties['items']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }

@@ -1,45 +1,36 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Php_Stan\Php_Doc_Parser\Ast\Const_Expr;
 
-namespace PHPStan\PhpDocParser\Ast\ConstExpr;
-
-use PHPStan\PhpDocParser\Ast\NodeAttributes;
-
+use Php_Stan\Php_Doc_Parser\Ast\Node_Attributes;
 use function sprintf;
 use function str_replace;
 use function strlen;
 use function substr;
-
-class DoctrineConstExprStringNode extends ConstExprStringNode
+class Doctrine_Const_Expr_String_Node extends Const_Expr_String_Node
 {
-    use NodeAttributes;
-
+    use Node_Attributes;
     public string $value;
-
     public function __construct(string $value)
     {
         parent::__construct($value, self::DOUBLE_QUOTED);
         $this->value = $value;
     }
-
     public function __toString(): string
     {
         return self::escape($this->value);
     }
-
     public static function unescape(string $value): string
     {
         // from https://github.com/doctrine/annotations/blob/a9ec7af212302a75d1f92fa65d3abfbd16245a2a/lib/Doctrine/Common/Annotations/DocLexer.php#L103-L107
         return str_replace('""', '"', substr($value, 1, strlen($value) - 2));
     }
-
     private static function escape(string $value): string
     {
         // from https://github.com/phpstan/phpdoc-parser/issues/205#issuecomment-1662323656
         return sprintf('"%s"', str_replace('"', '""', $value));
     }
-
     /**
      * @param array<string, mixed> $properties
      */
@@ -48,10 +39,9 @@ class DoctrineConstExprStringNode extends ConstExprStringNode
         $instance = new self($properties['value']);
         if (isset($properties['attributes'])) {
             foreach ($properties['attributes'] as $key => $value) {
-                $instance->setAttribute($key, $value);
+                $instance->set_attribute($key, $value);
             }
         }
         return $instance;
     }
-
 }
