@@ -14,8 +14,8 @@
 	<rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
 		<properties>
 			<property name="rootNamespaces" type="array">
-				<element key="src" value="PHPStan\PhpDocParser"/>
-				<element key="tests/PHPStan" value="PHPStan\PhpDocParser"/>
+				<element key="src" value="PHP_Stan\Php_Doc_Parser"/>
+				<element key="tests/PHPStan" value="PHP_Stan\Php_Doc_Parser"/>
 			</property>
 		</properties>
 	</rule>
